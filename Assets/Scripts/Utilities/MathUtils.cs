@@ -96,12 +96,22 @@ public static class MathUtils
 
     #endregion
 
-    #region Other Functions
+    #region Other Math Functions
 
-    public static float Remap(float value, float min1, float max1, float min2, float max2)
+    public static float Normalize(float value, float min, float max)
     {
-        value = Mathf.Clamp(value, min1, max1);
-        return (value - min1) / (max1 - min1) * (max2 - min2) + min2;
+        return (value - min) / (max - min);
+    }
+
+    public static int RoundUp(float value)
+    {
+        return (int) Mathf.Ceil(value);
+    }
+
+    public static float Remap(float value, float fromRangeMin, float fromRangeMax, float toRangeMin, float toRangeMax)
+    {
+        value = Mathf.Clamp(value, fromRangeMin, fromRangeMax); // just in case the value is outside the bounds
+        return (value - fromRangeMin) / (fromRangeMax - fromRangeMin) * (toRangeMax - toRangeMin) + toRangeMin;
     }
 
     #endregion
