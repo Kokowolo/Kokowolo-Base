@@ -1,3 +1,16 @@
+/**
+ * File Name: MathUtils.cs
+ * Description: Script that contains various mathematical utility functions
+ * 
+ * Authors: Will Lacey
+ * Date Created: January 15, 2022
+ * 
+ * Additional Comments: 
+ *      File Line Length: 120
+ *      
+ *      This script has also been created in Project-Fort; although it has been adapted to better fit this package
+ **/
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -66,33 +79,25 @@ public static class MathUtils
         return point;
     }
 
-    public static Vector3 GetRandomVector3(float randomness) // HACK: is this really needed?
+    public static Vector3 GetRandomVector3(float minInclusive, float maxInclusive)
     {
         return new Vector3
         {
-            x = Random.Range(-randomness, randomness),
-            y = Random.Range(-randomness, randomness),
-            z = Random.Range(-randomness, randomness)
+            x = Random.Range(minInclusive, maxInclusive),
+            y = Random.Range(minInclusive, maxInclusive),
+            z = Random.Range(minInclusive, maxInclusive)
         };
     }
 
-    public static Vector3 GetRandomVector3(float from, float to) // HACK: is this really needed?
+    public static Color GetRandomColor()
     {
-        return new Vector3
-        {
-            x = Random.Range(from, to),
-            y = Random.Range(from, to),
-            z = Random.Range(from, to)
-        };
+        return new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
     }
 
     #endregion
 
     #region Other Functions
 
-    /// <summary>
-    /// Remaps a value from one range to a value from another
-    /// </summary>
     public static float Remap(float value, float min1, float max1, float min2, float max2)
     {
         value = Mathf.Clamp(value, min1, max1);
