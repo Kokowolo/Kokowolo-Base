@@ -87,36 +87,59 @@ public class CustomMesh : MonoBehaviour
         if (hasCollider) MeshCollider.sharedMesh = Mesh;
     }
 
-    public void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3, bool isDoubleSided = false)
+    public void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3, int subdivides = 0, bool isDoubleSided = false)
     {
-        int vertexIndex = Vertices.Count;
+        int currentVertexIndex = Vertices.Count;
 
         Vertices.Add(v1);
         Vertices.Add(v2);
         Vertices.Add(v3);
 
-        Triangles.Add(vertexIndex);
-        Triangles.Add(vertexIndex + 1);
-        Triangles.Add(vertexIndex + 2);
+        Triangles.Add(currentVertexIndex);
+        Triangles.Add(currentVertexIndex + 1);
+        Triangles.Add(currentVertexIndex + 2);
 
         if (isDoubleSided) AddTriangle(v3, v2, v1);
     }
 
-    public void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, bool isDoubleSided = false)
+    public void Test(Vector3 v1, Vector3 v2, Vector3 v3, int subdivides)
     {
-        int vertexIndex = Vertices.Count;
+        int currentVertexIndex = Vertices.Count;;
+
+        // add vertices
+        int vertexCount = GetVertexCountAfterNumberOfSubdivides(subdivides);
+        for (int v = 0; v < vertexCount; v++)
+        {
+            Vertices.Add(GetVertexFromSubdividedTriangle(v1, v2, v3, subdivides, v));
+        }
+
+        // add triangles
+        int triangleCount = GetTriangleCountAfterNumberOfSubdivides(subdivides);
+        for (int t = 0; t < triangleCount; t++)
+        {
+            // Triangles.Add(currentVertexIndex + t);
+            // Triangles.Add(currentVertexIndex + t + 1);
+            // Triangles.Add(currentVertexIndex + t + 2);
+        }
+
+        // int triangleLayer = GetTriangleLayerCountAfterNumberOfSubdivides(subdivides);
+    }
+
+    public void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, int subdivides = 0, bool isDoubleSided = false)
+    {
+        int currentVertexIndex = Vertices.Count;
 
         Vertices.Add(v1);
         Vertices.Add(v2);
         Vertices.Add(v3);
         Vertices.Add(v4);
 
-        Triangles.Add(vertexIndex);
-        Triangles.Add(vertexIndex + 1);
-        Triangles.Add(vertexIndex + 2);
-        Triangles.Add(vertexIndex + 2);
-        Triangles.Add(vertexIndex + 3);
-        Triangles.Add(vertexIndex);
+        Triangles.Add(currentVertexIndex);
+        Triangles.Add(currentVertexIndex + 1);
+        Triangles.Add(currentVertexIndex + 2);
+        Triangles.Add(currentVertexIndex + 2);
+        Triangles.Add(currentVertexIndex + 3);
+        Triangles.Add(currentVertexIndex);
 
         if (isDoubleSided) AddQuad(v4, v3, v2, v1);
     }
@@ -145,6 +168,29 @@ public class CustomMesh : MonoBehaviour
                 this.TriangulateSphere(5);
                 break;
         }
+    }
+
+    private Vector3 GetVertexFromSubdividedTriangle(Vector3 v1, Vector3 v2, Vector3 v3, int subdivides, int vertexIndex)
+    {
+        return new Vector3();
+    }
+
+    private int GetTriangleCountAfterNumberOfSubdivides(int subdivides)
+    {
+        if (subdivides < 0) return 0;
+        return (int) Mathf.Pow(4, subdivides);
+    }
+
+    private int GetVertexCountAfterNumberOfSubdivides(int subdivides)
+    {
+        if (subdivides < 0) return 0;
+        return (int) ((Mathf.Pow(2, subdivides) + 1) * (Mathf.Pow(2, subdivides) + 2) / 2);
+    }
+
+    private int GetTriangleLayerCountAfterNumberOfSubdivides(int subdivides)
+    {
+        if (subdivides < 0) return 0;
+        return (int) Mathf.Pow(2, subdivides) + 1;
     }
 
     #endregion
