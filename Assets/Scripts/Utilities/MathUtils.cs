@@ -34,7 +34,7 @@ public static class MathUtils
     {
         get
         {
-            if (_noiseSource == null) _noiseSource = Resources.Load<Texture2D>("noise_Perlin");
+            if (_noiseSource == null) _noiseSource = Resources.Load<Texture2D>("Noise Perlin");
             return _noiseSource;
         }
         set => _noiseSource = value;
