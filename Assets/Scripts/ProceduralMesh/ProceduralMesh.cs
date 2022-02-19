@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))] // HACK: [BED-15] should MeshCollider be mandated?
+[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class ProceduralMesh : MonoBehaviour
 {
     /************************************************************/
@@ -34,23 +34,14 @@ public class ProceduralMesh : MonoBehaviour
     #region Properties
 
     public Mesh Mesh { get; set; }
+    public MeshFilter MeshFilter => GetComponent<MeshFilter>();
+    public MeshRenderer MeshRenderer => GetComponent<MeshRenderer>();
+    public MeshCollider MeshCollider => GetComponent<MeshCollider>();
     
     public List<Vector3> Vertices { get; set; } = new List<Vector3>();
-
     public List<int> Triangles { get; set; } = new List<int>();
-
-    public MeshFilter MeshFilter => GetComponent<MeshFilter>();
-
-    public MeshRenderer MeshRenderer => GetComponent<MeshRenderer>();
-
-    public MeshCollider MeshCollider => GetComponent<MeshCollider>();
-
-    public bool HasUVs { get; set; }
-
     public List<Vector3> UVs { get; set; } = new List<Vector3>();
-
-    // public bool HasTangents { get; set; }
-
+    // public List<Vector3> Normals { get; set; } = new List<Vector3>();
     // public List<Vector3> Tangents { get; set; } = new List<Vector3>();
 
     #endregion
@@ -64,6 +55,8 @@ public class ProceduralMesh : MonoBehaviour
         Mesh = new Mesh();
         MeshFilter.mesh = Mesh;
 
+        if (meshShape == MeshShape.Procedural) return;
+        
         TriangulateMeshShape();
     }
 
@@ -83,8 +76,6 @@ public class ProceduralMesh : MonoBehaviour
         Mesh.Clear();
         Vertices.Clear();
         Triangles.Clear();
-
-        // MeshCollider.Clear() // HACK: [BED-15] does this need to be cleared? AND see other Hack
     }
 
     public void Apply(bool hasMeshCollider = false)
@@ -92,12 +83,12 @@ public class ProceduralMesh : MonoBehaviour
         Mesh.SetVertices(Vertices);
         Mesh.SetTriangles(Triangles, 0);
 
-        if (HasUVs) Mesh.SetUVs(0, UVs);
-        // if (HasNormals) Mesh.SetNormals(Normals);
-        // if (HasTangents) Mesh.SetTangents(Tangents);
+        if (UVs.Count != 0) Mesh.SetUVs(0, UVs);
 
         Mesh.RecalculateNormals();
         Mesh.RecalculateTangents();
+        // if (Normals.Count != 0) Mesh.SetNormals(Normals);
+        // if (Tangents.Count != 0) Mesh.SetTangents(Tangents);
 
         if (hasMeshCollider) MeshCollider.sharedMesh = Mesh;
     }

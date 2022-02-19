@@ -16,6 +16,7 @@ using UnityEngine;
 
 public static class ProceduralMeshExtensions
 {
+    /************************************************************/
     #region Triangle & Quad Functions
 
     public static void TriangulateTriangle(this ProceduralMesh proceduralMesh, float edgeLength)
@@ -36,7 +37,6 @@ public static class ProceduralMeshExtensions
         Vector2 uv3 = new Vector2(1, 0);   
         proceduralMesh.AddTriangleUV(uv1, uv2, uv3, isDoubleSided: true);
 
-        proceduralMesh.HasUVs = true;
         proceduralMesh.Apply(hasMeshCollider: true);
     }
 
@@ -56,7 +56,6 @@ public static class ProceduralMeshExtensions
         Vector2 uv4 = new Vector2(1, 1);
         proceduralMesh.AddQuadUV(uv1, uv2, uv3, uv4, isDoubleSided: true);
 
-        proceduralMesh.HasUVs = true;
         proceduralMesh.Apply(hasMeshCollider: true);
     }
 
@@ -148,8 +147,6 @@ public static class ProceduralMeshExtensions
     public static void TriangulateQuad(this ProceduralMesh proceduralMesh, 
         float lengthX, float lengthZ, int numberOfQuadsX, int numberOfQuadsZ)
     {
-        proceduralMesh.HasUVs = true;
-
         Vector3 v1 = new Vector3();
         Vector3 v2 = new Vector3();
         Vector3 v3 = new Vector3();
@@ -189,4 +186,5 @@ public static class ProceduralMeshExtensions
     }
 
     #endregion
+    /************************************************************/
 }
