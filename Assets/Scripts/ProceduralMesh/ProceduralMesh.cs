@@ -54,10 +54,6 @@ public class ProceduralMesh : MonoBehaviour
     {
         Mesh = new Mesh();
         MeshFilter.mesh = Mesh;
-
-        if (meshShape == MeshShape.Procedural) return;
-        
-        TriangulateMeshShape();
     }
 
     private void OnDestroy()
@@ -76,6 +72,10 @@ public class ProceduralMesh : MonoBehaviour
         Mesh.Clear();
         Vertices.Clear();
         Triangles.Clear();
+
+        UVs.Clear();
+        // Normals.Clear();
+        // Tangents.Clear();
     }
 
     public void Apply(bool hasMeshCollider = false)
@@ -93,72 +93,125 @@ public class ProceduralMesh : MonoBehaviour
         if (hasMeshCollider) MeshCollider.sharedMesh = Mesh;
     }
 
-    public void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3, bool isDoubleSided = false)
-    {
-        int vertexIndex = Vertices.Count;
+    public void AddTriangle(Vector3 v0, Vector3 v1, Vector3 v2, int subdivisions = 0)
+    {   
+        // triangle layer count, vertex count, & triangle count (as floats to avoid casting)
+        int lCount = (int) Mathf.Pow(2, subdivisions) + 1;
+        int vCount = lCount * (lCount + 1) / 2;
+        int tCount = (int) Mathf.Pow(4, subdivisions);
 
-        Vertices.Add(v1);
+        Vertices.Add(v0);
+        for (int l = 2; l <= lCount; l++)
+        {
+            Vector3 v01 = Vector3.Lerp(v0, v1, (l - 1f) / (lCount - 1f));
+            Vector3 v02 = Vector3.Lerp(v0, v2, (l - 1f) / (lCount - 1f));
+
+            int vIndex = Vertices.Count - 1;
+            for (int v = 1; v <= l; v++) 
+            {
+                Vertices.Add(Vector3.Lerp(v01, v02, (v - 1f) / (l - 1f)));
+
+                if (v == 1) continue;
+                Triangles.Add(vIndex + v);          // current vertex                   
+                Triangles.Add(vIndex + v - l);      // up right vertex neighbor
+                Triangles.Add(vIndex + v - 1);      // right vertex neighbor
+                if (v == l) continue;
+                Triangles.Add(vIndex + v);          // current vertex
+                Triangles.Add(vIndex + v - l + 1);  // up right vertex neighbor
+                Triangles.Add(vIndex + v - l);      // up right vertex neighbor
+            }
+        }   
+    }
+
+    public void AddTriangleUV(Vector2 uv0, Vector2 uv1, Vector3 uv2, int subdivisions = 0)
+    {
+        // triangle layer count, vertex count, & triangle count (as floats to avoid casting)
+        int lCount = (int) Mathf.Pow(2, subdivisions) + 1;
+        int vCount = lCount * (lCount + 1) / 2;
+        int tCount = (int) Mathf.Pow(4, subdivisions);
+
+        UVs.Add(uv0);
+        for (int l = 2; l <= lCount; l++)
+        {
+            Vector2 uv01 = Vector2.Lerp(uv0, uv1, (l - 1f) / (lCount - 1f));
+            Vector2 uv02 = Vector2.Lerp(uv0, uv2, (l - 1f) / (lCount - 1f));
+            
+            for (int v = 1; v <= l; v++) 
+            {
+                UVs.Add(Vector2.Lerp(uv01, uv02, (v - 1f) / (l - 1f)));
+            }
+        }   
+    }
+
+    public void AddQuad(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3, int subdivisions = 0)
+    {
+        int vIndex = Vertices.Count;
+
+        Vertices.Add(v0);
+		Vertices.Add(v1);
         Vertices.Add(v2);
         Vertices.Add(v3);
 
-        Triangles.Add(vertexIndex);
-        Triangles.Add(vertexIndex + 1);
-        Triangles.Add(vertexIndex + 2);
-
-        if (isDoubleSided) AddTriangle(v3, v2, v1);
+        Triangles.Add(vIndex);
+        Triangles.Add(vIndex + 1);
+        Triangles.Add(vIndex + 2);
+        Triangles.Add(vIndex + 2);
+        Triangles.Add(vIndex + 3);
+        Triangles.Add(vIndex);
     }
 
-    public void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, bool isDoubleSided = false)
+    public void AddQuadUV(Vector2 uv0, Vector2 uv1, Vector3 uv2, Vector3 uv3, int subdivisions = 0) 
     {
-        int vertexIndex = Vertices.Count;
-
-        Vertices.Add(v1);
-        Vertices.Add(v2);
-        Vertices.Add(v3);
-        Vertices.Add(v4);
-
-        Triangles.Add(vertexIndex);
-        Triangles.Add(vertexIndex + 1);
-        Triangles.Add(vertexIndex + 2);
-        Triangles.Add(vertexIndex + 2);
-        Triangles.Add(vertexIndex + 3);
-        Triangles.Add(vertexIndex);
-
-        if (isDoubleSided) AddQuad(v4, v3, v2, v1);
-    }
-
-    public void AddTriangleUV (Vector2 uv1, Vector2 uv2, Vector3 uv3, bool isDoubleSided = false) 
-    {
+        UVs.Add(uv0);
 		UVs.Add(uv1);
-		UVs.Add(uv2);
-		UVs.Add(uv3);
-
-        if (isDoubleSided) AddTriangleUV(uv3, uv2, uv1);
-	}
-
-    public void AddQuadUV (Vector2 uv1, Vector2 uv2, Vector3 uv3, Vector3 uv4, bool isDoubleSided = false) 
-    {
-		UVs.Add(uv1);
-		UVs.Add(uv2);
-		UVs.Add(uv3);
-		UVs.Add(uv4);
-
-        if (isDoubleSided) AddQuadUV(uv4, uv3, uv2, uv1);
+        UVs.Add(uv2);
+        UVs.Add(uv3);
 	}
 
     #endregion
 
-    #region Other Functions
+    #endregion
+    /************************************************************/
+    #region Debug
+    #if DEBUG
 
-    private void TriangulateMeshShape()
+    [Header("Debug Settings")]
+    [Tooltip("size of shape")]
+    [SerializeField, Range(0, 10)] int size = 0;
+    [Tooltip("number of subdivisions per triangle for the shape")]
+    [SerializeField, Range(0, 7)] int subdivisions = 0;
+    [Tooltip("size of Gizmos spheres on shape's vertices")]
+    [SerializeField, Min(0)] float gizmosVertexSize = 0.1f;
+
+    private void OnValidate()
     {
+        if (!Mesh) return;
+        Debug.Log("Retriangulating");
+        Start();
+    }
+    
+    private void OnDrawGizmosSelected()
+    {
+        float shade = 0;
+        for (int i = 0; i < Vertices.Count; i++) 
+        {
+            shade = (float) i / Vertices.Count;
+            Gizmos.color = new Color(shade, shade, shade);
+            Gizmos.DrawSphere(transform.TransformPoint(Vertices[i]), gizmosVertexSize);
+            UnityEditor.Handles.Label(transform.TransformPoint(Vertices[i]), $"{i}");
+        }
+    }
+
+    private void Start()
+    {
+        Clear();
         switch (meshShape)
         {
             case MeshShape.Triangle:
-                this.TriangulateTriangle(5);
+                this.TriangulateTriangle(size, subdivisions);
                 break;
             case MeshShape.Quad:
-                this.TriangulateQuad(5);
+                this.TriangulateQuad(size, subdivisions);
                 break;
             case MeshShape.Cube:
                 this.TriangulateCube(5);
@@ -167,28 +220,12 @@ public class ProceduralMesh : MonoBehaviour
                 this.TriangulateTetrahedron(5);
                 break;
             case MeshShape.Sphere:
-                this.TriangulateSphere(5);
+                this.TriangulateSphere(size, subdivisions);
                 break;
         }
     }
 
-    #endregion
-
-    #endregion
-    /************************************************************/
-    #region Debug
-
-    private void OnDrawGizmos()
-    {
-        float shade = 0;
-        for (int i = 0; i < Vertices.Count; i++) 
-        {
-            shade = (float) i / Vertices.Count;
-            Gizmos.color = new Color(shade, shade, shade);
-            Gizmos.DrawSphere(transform.TransformPoint(Vertices[i]), 0.1f);
-        }
-    }
-
+    #endif
     #endregion
     /************************************************************/
 }
