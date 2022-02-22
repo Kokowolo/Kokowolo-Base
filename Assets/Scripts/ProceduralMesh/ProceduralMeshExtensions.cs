@@ -16,50 +16,11 @@ using UnityEngine;
 
 public static class ProceduralMeshExtensions
 {
-    /************************************************************/
-    #region Triangle & Quad Functions
-
-    public static void TriangulateTriangle(this ProceduralMesh proceduralMesh, float edgeLength, int subdivisions = 0)
-    {
-        Vector3 v0 = new Vector3(0, 0, 0);
-        Vector3 v1 = new Vector3(0, 0, 1);
-        Vector3 v2 = new Vector3(1, 0, 0);
-        proceduralMesh.AddTriangle(v0, v1, v2, subdivisions);
-
-        Vector2 uv0 = new Vector2(0, 0);
-        Vector2 uv1 = new Vector2(0, 1);
-        Vector2 uv2 = new Vector2(1, 0);
-        proceduralMesh.AddTriangleUV(uv0, uv1, uv2, subdivisions);
-
-        proceduralMesh.Apply();
-    }
-
-    public static void TriangulateQuad(this ProceduralMesh proceduralMesh, float edgeLength, int subdivisions = 0)
-    {
-        float halfEdgeLength = 0.5f * edgeLength;
-
-        Vector3 v0 = new Vector3(halfEdgeLength, 0, halfEdgeLength);
-        Vector3 v1 = new Vector3(halfEdgeLength, 0, -halfEdgeLength);
-        Vector3 v2 = new Vector3(-halfEdgeLength, 0, -halfEdgeLength);
-        Vector3 v3 = new Vector3(-halfEdgeLength, 0, halfEdgeLength);
-        proceduralMesh.AddQuad(v0, v1, v2, v3, subdivisions);
-
-        Vector2 uv0 = new Vector2(0, 0);        // 0,1      1,1
-        Vector2 uv1 = new Vector2(1, 0);        //  how textures
-        Vector2 uv2 = new Vector2(1, 1);        //  are UV'ed
-        Vector2 uv3 = new Vector2(0, 1);        // 0,0      1,0
-        proceduralMesh.AddQuadUV(uv0, uv1, uv2, uv3, subdivisions);
-
-        proceduralMesh.Apply(hasMeshCollider: true);
-    }
-
-    #endregion
-
     #region Cube & Tetrahedron Functions
 
-    public static void TriangulateCube(this ProceduralMesh proceduralMesh, float edgeLength)
+    public static void TriangulateCube(this ProceduralMesh proceduralMesh, float edgeLength, int subdivisions = 0)
     {
-        AddCubePointsToProceduralMesh(proceduralMesh, edgeLength);
+        AddCubePointsToProceduralMesh(proceduralMesh, edgeLength, subdivisions);
         proceduralMesh.Apply();
     }
 
@@ -68,26 +29,39 @@ public static class ProceduralMeshExtensions
     {
         float halfEdgeLength = 0.5f * edgeLength;
 
-        Vector3 v0 = new Vector3(halfEdgeLength, halfEdgeLength, halfEdgeLength);
+        Vector3 v0 = new Vector3(-halfEdgeLength, halfEdgeLength, -halfEdgeLength);
         Vector3 v1 = new Vector3(halfEdgeLength, halfEdgeLength, -halfEdgeLength);
-        Vector3 v2 = new Vector3(halfEdgeLength, -halfEdgeLength, halfEdgeLength);
-        Vector3 v3 = new Vector3(halfEdgeLength, -halfEdgeLength, -halfEdgeLength);
-        Vector3 v4 = new Vector3(-halfEdgeLength, halfEdgeLength, halfEdgeLength);
-        Vector3 v5 = new Vector3(-halfEdgeLength, halfEdgeLength, -halfEdgeLength);
+        Vector3 v2 = new Vector3(halfEdgeLength, -halfEdgeLength, -halfEdgeLength);
+        Vector3 v3 = new Vector3(-halfEdgeLength, -halfEdgeLength, -halfEdgeLength);
+
+        Vector3 v4 = new Vector3(halfEdgeLength, halfEdgeLength, halfEdgeLength);
+        Vector3 v5 = new Vector3(halfEdgeLength, -halfEdgeLength, halfEdgeLength);
         Vector3 v6 = new Vector3(-halfEdgeLength, -halfEdgeLength, halfEdgeLength);
-        Vector3 v7 = new Vector3(-halfEdgeLength, -halfEdgeLength, -halfEdgeLength);
+        Vector3 v7 = new Vector3(-halfEdgeLength, halfEdgeLength, halfEdgeLength);
+        
+        Vector2 uv0 = new Vector2(0, 1);        // 0,1      1,1
+        Vector2 uv1 = new Vector2(1, 1);        //  how textures
+        Vector2 uv2 = new Vector2(1, 0);        //  are UV'ed
+        Vector2 uv3 = new Vector2(0, 0);        // 0,0      1,0
 
         // sides
-        proceduralMesh.AddQuad(v0, v2, v3, v1, subdivisions);
-        proceduralMesh.AddQuad(v5, v1, v3, v7, subdivisions);
-        proceduralMesh.AddQuad(v0, v4, v6, v2, subdivisions);
-        proceduralMesh.AddQuad(v4, v5, v7, v6, subdivisions);
+        proceduralMesh.AddQuad(v0, v1, v2, v3, subdivisions);
+        proceduralMesh.AddQuad(v1, v4, v5, v2, subdivisions);
+        proceduralMesh.AddQuad(v4, v7, v6, v5, subdivisions);
+        proceduralMesh.AddQuad(v7, v0, v3, v6, subdivisions);
+        proceduralMesh.AddQuadUV(uv0, uv1, uv2, uv3, subdivisions);
+        proceduralMesh.AddQuadUV(uv0, uv1, uv2, uv3, subdivisions);
+        proceduralMesh.AddQuadUV(uv0, uv1, uv2, uv3, subdivisions);
+        proceduralMesh.AddQuadUV(uv0, uv1, uv2, uv3, subdivisions);
         // bases
-        proceduralMesh.AddQuad(v0, v1, v5, v4, subdivisions);
-        proceduralMesh.AddQuad(v2, v6, v7, v3, subdivisions);
+        proceduralMesh.AddQuad(v7, v4, v1, v0, subdivisions);
+        proceduralMesh.AddQuad(v3, v2, v5, v6, subdivisions);
+        proceduralMesh.AddQuadUV(uv0, uv1, uv2, uv3, subdivisions);
+        proceduralMesh.AddQuadUV(uv0, uv1, uv2, uv3, subdivisions);
     }
 
-    public static void TriangulateTetrahedron(this ProceduralMesh proceduralMesh, float edgeLength)
+    public static void TriangulateTetrahedron(this ProceduralMesh proceduralMesh, float edgeLength, 
+        int subdivisions = 0)
     {
         Vector3 centroid = proceduralMesh.transform.position;
         float height = Mathf.Sqrt(2f/3f) * edgeLength;
@@ -137,50 +111,45 @@ public static class ProceduralMeshExtensions
     }
 
     #endregion
+    /************************************************************/
+    #region Debug
+    #if DEBUG
 
-    #region Temp Functions
-
-    public static void TriangulateQuad(this ProceduralMesh proceduralMesh, 
-        float lengthX, float lengthZ, int numberOfQuadsX, int numberOfQuadsZ)
+    public static void TriangulateTriangle(this ProceduralMesh proceduralMesh, float edgeLength, int subdivisions = 0)
     {
-        Vector3 v0 = new Vector3();
-        Vector3 v1 = new Vector3();
-        Vector3 v2 = new Vector3();
-        Vector3 v3 = new Vector3();
+        Vector3 v0 = new Vector3(0, 0, 0) * edgeLength;
+        Vector3 v1 = new Vector3(0, 0, 1) * edgeLength;
+        Vector3 v2 = new Vector3(1, 0, 0) * edgeLength;
+        proceduralMesh.AddTriangle(v0, v1, v2, subdivisions);
 
-        Vector2 uv0 = new Vector2();
-        Vector2 uv1 = new Vector2();
-        Vector2 uv2 = new Vector2();
-        Vector2 uv3 = new Vector2();
-
-        for (int z = 0; z < numberOfQuadsZ; z++)
-        {
-            v1 = new Vector3(0, 0, z * lengthZ / numberOfQuadsZ);
-            v3 = new Vector3(0, 0, (z + 1) * lengthZ / numberOfQuadsZ);
-
-            uv1 = new Vector3(0, z * lengthZ / numberOfQuadsZ);
-            uv3 = new Vector3(0, (z + 1) * lengthZ / numberOfQuadsZ);
-            
-            for (int x = 0; x < numberOfQuadsX; x++)
-            {
-                v0 = v1;
-                v1 = new Vector3((x + 1) * lengthX / numberOfQuadsX, 0, z * lengthZ / numberOfQuadsZ);
-                v2 = v3;
-                v3 = new Vector3((x + 1) * lengthX / numberOfQuadsX, 0, (z + 1) * lengthZ / numberOfQuadsZ);
-                proceduralMesh.AddQuad(v2, v3, v1, v0);
-
-                uv0 = uv1;
-                uv1 = new Vector2((x + 1) * lengthX / numberOfQuadsX, z * lengthZ / numberOfQuadsZ);
-                uv2 = uv3;
-                uv3 = new Vector2((x + 1) * lengthX / numberOfQuadsX, (z + 1) * lengthZ / numberOfQuadsZ);
-
-                proceduralMesh.AddQuadUV(uv2, uv3, uv1, uv0);
-            }
-        }
+        Vector2 uv0 = new Vector2(0, 0);
+        Vector2 uv1 = new Vector2(0, 1);
+        Vector2 uv2 = new Vector2(1, 0);
+        proceduralMesh.AddTriangleUV(uv0, uv1, uv2, subdivisions);
 
         proceduralMesh.Apply();
     }
 
+    public static void TriangulateQuad(this ProceduralMesh proceduralMesh, float edgeLength, int subdivisions = 0)
+    {
+        float halfEdgeLength = 0.5f * edgeLength;
+
+        Vector3 v0 = new Vector3(-halfEdgeLength, 0, halfEdgeLength);
+        Vector3 v1 = new Vector3(halfEdgeLength, 0, halfEdgeLength);
+        Vector3 v2 = new Vector3(halfEdgeLength, 0, -halfEdgeLength);
+        Vector3 v3 = new Vector3(-halfEdgeLength, 0, -halfEdgeLength);
+        proceduralMesh.AddQuad(v0, v1, v2, v3, subdivisions);
+
+        Vector2 uv0 = new Vector2(0, 1);    // 0,1      1,1
+        Vector2 uv1 = new Vector2(1, 1);    //  how textures
+        Vector2 uv2 = new Vector2(1, 0);    //  are UV'ed
+        Vector2 uv3 = new Vector2(0, 0);    // 0,0      1,0
+        proceduralMesh.AddQuadUV(uv0, uv1, uv2, uv3, subdivisions);
+
+        proceduralMesh.Apply(hasMeshCollider: true);
+    }
+
+    #endif
     #endregion
     /************************************************************/
 }

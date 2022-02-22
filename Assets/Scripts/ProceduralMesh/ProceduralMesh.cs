@@ -136,36 +136,51 @@ public class ProceduralMesh : MonoBehaviour
             Vector2 uv01 = Vector2.Lerp(uv0, uv1, (l - 1f) / (lCount - 1f));
             Vector2 uv02 = Vector2.Lerp(uv0, uv2, (l - 1f) / (lCount - 1f));
             
-            for (int v = 1; v <= l; v++) 
-            {
-                UVs.Add(Vector2.Lerp(uv01, uv02, (v - 1f) / (l - 1f)));
-            }
+            for (int v = 1; v <= l; v++) UVs.Add(Vector2.Lerp(uv01, uv02, (v - 1f) / (l - 1f)));
         }   
     }
 
     public void AddQuad(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3, int subdivisions = 0)
     {
-        int vIndex = Vertices.Count;
+        // quad layer count, vertex count, & quad count (as floats to avoid casting)
+        int lCount = (int) Mathf.Pow(2, subdivisions) + 1;
+        int vCount = lCount * lCount;
+        int sCount = (int) Mathf.Pow(4, subdivisions);
 
-        Vertices.Add(v0);
-		Vertices.Add(v1);
-        Vertices.Add(v2);
-        Vertices.Add(v3);
+        for (int l = 1; l <= lCount; l++)
+        {
+            Vector3 v03 = Vector3.Lerp(v0, v3, (l - 1f) / (lCount - 1f));
+            Vector3 v12 = Vector3.Lerp(v1, v2, (l - 1f) / (lCount - 1f));
 
-        Triangles.Add(vIndex);
-        Triangles.Add(vIndex + 1);
-        Triangles.Add(vIndex + 2);
-        Triangles.Add(vIndex + 2);
-        Triangles.Add(vIndex + 3);
-        Triangles.Add(vIndex);
+            int vIndex = Vertices.Count - 1;
+            for (int v = 1; v <= lCount; v++) 
+            {
+                Vertices.Add(Vector3.Lerp(v03, v12, (v - 1f) / (lCount - 1f)));
+
+                if (l == 1 || v == 1) continue;
+                Triangles.Add(vIndex + v);              // current vertex                   
+                Triangles.Add(vIndex + v - 1);          // left vertex neighbor
+                Triangles.Add(vIndex + v - lCount - 1); // up left vertex neighbor
+                Triangles.Add(vIndex + v);              // current vertex                   
+                Triangles.Add(vIndex + v - lCount - 1); // up left vertex neighbor
+                Triangles.Add(vIndex + v - lCount);     // up vertex neighbor
+            }
+        }   
     }
-
     public void AddQuadUV(Vector2 uv0, Vector2 uv1, Vector3 uv2, Vector3 uv3, int subdivisions = 0) 
     {
-        UVs.Add(uv0);
-		UVs.Add(uv1);
-        UVs.Add(uv2);
-        UVs.Add(uv3);
+        // quad layer count, vertex count, & quad count (as floats to avoid casting)
+        int lCount = (int) Mathf.Pow(2, subdivisions) + 1;
+        int vCount = lCount * lCount;
+        int sCount = (int) Mathf.Pow(4, subdivisions);
+
+        for (int l = 1; l <= lCount; l++)
+        {
+            Vector2 uv03 = Vector2.Lerp(uv0, uv3, (l - 1f) / (lCount - 1f));
+            Vector2 uv12 = Vector2.Lerp(uv1, uv2, (l - 1f) / (lCount - 1f));
+
+            for (int v = 1; v <= lCount; v++) UVs.Add(Vector3.Lerp(uv03, uv12, (v - 1f) / (lCount - 1f)));
+        }   
 	}
 
     #endregion
@@ -214,10 +229,10 @@ public class ProceduralMesh : MonoBehaviour
                 this.TriangulateQuad(size, subdivisions);
                 break;
             case MeshShape.Cube:
-                this.TriangulateCube(5);
+                this.TriangulateCube(size, subdivisions);
                 break;
             case MeshShape.Tetrahedron:
-                this.TriangulateTetrahedron(5);
+                this.TriangulateTetrahedron(size, subdivisions);
                 break;
             case MeshShape.Sphere:
                 this.TriangulateSphere(size, subdivisions);
