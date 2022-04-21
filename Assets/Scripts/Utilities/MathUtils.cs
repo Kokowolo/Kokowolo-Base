@@ -114,6 +114,37 @@ public static class MathUtils
         return (value - fromRangeMin) / (fromRangeMax - fromRangeMin) * (toRangeMax - toRangeMin) + toRangeMin;
     }
 
+    /// <summary>
+    /// Gets the relative Euler angles between two quaternions across X, Y, and Z dimensions
+    /// </summary>
+    public static Vector3 RelativeSignedEulerAngles(Quaternion q1, Quaternion q2)
+    {
+        float xAngle = RelativeSignedAngle(q1, q2, Vector3.right, Vector3.up);
+        float yAngle = RelativeSignedAngle(q1, q2, Vector3.up, Vector3.right);
+        float zAngle = RelativeSignedAngle(q1, q2, Vector3.forward, Vector3.up);
+
+        return new Vector3(xAngle, yAngle, zAngle);
+    }
+
+    /// <summary>
+    /// Gets the relative Euler angle between two quaternions in regards to the given axes
+    /// </summary>
+    public static float RelativeSignedAngle(Quaternion q1, Quaternion q2, Vector3 axis1, Vector3 axis2)
+    {
+        Vector3 q1Axis1 = q1 * axis1; // q1's relative axis1
+        Vector3 q1Axis2 = q1 * axis2; // q1's relative axis2
+        Vector3 q2Axis1 = q2 * axis1; // q2's relative axis1
+
+        // align q2's axis1 to q1's
+        Quaternion q2Axis1Aligned = Quaternion.FromToRotation(q2Axis1, q1Axis1) * q2;
+
+        // axis2 of the q2 in world space after aligning the axis1 of q2 with the axis1 of q1
+        Vector3 q2Axis2Aligned = q2Axis1Aligned * axis2;
+
+        // gets relative signed angle
+        return Vector3.SignedAngle(q1Axis2, q2Axis2Aligned, q1Axis1);
+    }
+
     #endregion
 
     #endregion
