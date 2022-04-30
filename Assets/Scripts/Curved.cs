@@ -55,7 +55,7 @@ public class Curved : MonoBehaviour
 
     //private void EnsureCorrectLineRenderPositionCountQuadraticBezier()
     //{
-    //    // HACK: this is broken
+    //    // TODO: Quadratic Bezier code is not working and has errors
     //    int positionCount = points.Length + (points.Length - 1) * smoothingSections;
     //    lineRenderer.positionCount = positionCount;
 

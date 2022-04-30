@@ -1,9 +1,9 @@
 /*
- * File Name: SingletonHandler.cs
+ * File Name: TestRunner.cs
  * Description: This script is for ...
  * 
  * Author(s): Kokowolo, Will Lacey
- * Date Created: April 28, 2022
+ * Date Created: April 29, 2022
  * 
  * Additional Comments:
  *		While this file has been updated to better fit this project, the original version can be found here:
@@ -16,12 +16,33 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class SingletonHandler
+public class TestRunner : MonoBehaviour
 {
+    /************************************************************/
+    #region Fields
+
+    #endregion
+	/************************************************************/
+    #region Properties
+
+    #endregion
     /************************************************************/
     #region Functions
 
-    //public static 
+    private void Awake() 
+    {
+        
+    }
+
+    private void Start() 
+    {
+        
+    }
+
+    private void OnDestroy() 
+    {
+        
+    }
 
     #endregion
     /************************************************************/

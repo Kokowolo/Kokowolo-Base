@@ -43,6 +43,7 @@ public class Laser : MonoBehaviour
     private void Start()
     {
         Refresh();
+        // gameObject.transform.f
     }
 
     private void Update()
@@ -60,7 +61,7 @@ public class Laser : MonoBehaviour
         float min = 0.00000001f;
         Vector3 minAngle = new Vector3(min, min, min) * rotationSpeed * Time.deltaTime;//MathUtils.Remap(rotationSpeed, 0, 10, 0, 0);
         transform.Rotate(minAngle);
-        Debug.Log(transform.rotation.eulerAngles.ToString("F16"));
+        // Debug.Log(transform.rotation.eulerAngles.ToString("F16"));
         //Debug.Log(transform.rotation.eulerAngles.x);
     }
 
