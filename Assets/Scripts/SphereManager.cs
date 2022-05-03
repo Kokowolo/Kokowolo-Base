@@ -26,24 +26,28 @@ public class SphereManager : MonoBehaviour
     #region Fields
 
     [Header("Manager Settings")]
+    [SerializeField, Range(0, 10)] float bounds = 10;
+    [SerializeField, Range(0, 10)] float offset = 0.5f;
     [SerializeField, Min(1)] int countX = 10;
     [SerializeField, Min(1)] int countY = 10;
     [SerializeField, Min(1)] int countZ = 10;
-    [Tooltip("distance between spheres")]
-    [SerializeField, Range(0, 5)] float sphereDistance = 10;
 
     [Header("Sphere Settings")]
     [SerializeField, Range(0, 2)] float sphereRadius = 0.5f;
-    [SerializeField, Range(0, 5)] int sphereSubdivisions = 5;
-    [SerializeField] Material sphereMaterial = null;
+    [SerializeField, Range(0, 6)] int sphereSubdivisions = 5;
+    [SerializeField] Material _sphereMaterialDefault = null;
+    [SerializeField] Material _sphereMaterialLasered = null;
 
-    List<ProceduralMesh> spheres = new List<ProceduralMesh>();
+    List<SphereMesh> spheres = new List<SphereMesh>();
 
     #endregion
     /************************************************************/
     #region Properties
 
     public static SphereManager Instance => Singleton<SphereManager>.Get();
+
+    public Material SphereMaterialDefault => _sphereMaterialDefault;
+    public Material SphereMaterialLasered => _sphereMaterialLasered;
 
     #endregion
     /************************************************************/
@@ -53,7 +57,7 @@ public class SphereManager : MonoBehaviour
 
     private void Awake()
     {
-        Singleton<SphereManager>.Set(this);
+        Singleton<SphereManager>.Set(this, dontDestroyOnLoad: false);
         GenerateSpheres();
     }
 
@@ -104,22 +108,32 @@ public class SphereManager : MonoBehaviour
         gameObject.transform.parent = transform;
 
         // create Sphere
-        ProceduralMesh sphere = gameObject.AddComponent<ProceduralMesh>();
+        SphereMesh sphere = gameObject.AddComponent<SphereMesh>();
         gameObject.AddComponent<MeshCollider>();
-        sphere.MeshRenderer.material = sphereMaterial;
+        sphere.MeshRenderer.material = SphereMaterialDefault;
         spheres.Add(sphere);
     }
 
-    private void RegenerateSphere(ProceduralMesh sphere, int x, int y, int z)
+    private void RegenerateSphere(SphereMesh sphere, int x, int y, int z)
     {
-        sphere.Clear();
-        sphere.TriangulateSphere(sphereRadius, sphereSubdivisions, hasMeshCollider: true);
+        sphere.radius = sphereRadius;
+        sphere.subdivisions = sphereSubdivisions;
+        sphere.Refresh();
 
-        Vector3 position = new Vector3(x, y, z);
-        if (x % 2 == 0) position.z += 0.5f;
-        if (y % 2 == 0) position.x += 0.5f;
-        if (z % 2 == 0) position.y += 0.5f;
-        sphere.transform.position = transform.position + position * sphereDistance;
+        Vector3 position = new Vector3(bounds, bounds, bounds) * -0.5f;
+        
+        position.x += Mathf.Lerp(0, bounds, (x + 1f) / (countX + 1f));
+        position.y += Mathf.Lerp(0, bounds, (y + 1f) / (countY + 1f));
+        position.z += Mathf.Lerp(0, bounds, (z + 1f) / (countZ + 1f));
+
+        // position.z += (x % 2 == 0) ? 0.5f * offset : -0.5f * offset;
+        // position.x += (y % 2 == 0) ? 0.5f * offset : -0.5f * offset;
+        // position.y += (z % 2 == 0) ? 0.5f * offset : -0.5f * offset;
+        if (x % 2 == 1) position.z += offset;
+        if (y % 2 == 1) position.x += offset;
+        if (z % 2 == 1) position.y += offset;
+
+        sphere.transform.position = transform.position + position;
     }
 
     #endregion

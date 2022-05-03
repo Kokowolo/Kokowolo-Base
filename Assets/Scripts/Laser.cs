@@ -16,7 +16,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using Kokowolo.Utilities;
+using Kokowolo.ProceduralMesh;
 
 [RequireComponent(typeof(LineRenderer))]
 public class Laser : MonoBehaviour
@@ -26,13 +26,23 @@ public class Laser : MonoBehaviour
 
     [Header("Cached References")]
     [SerializeField] LineRenderer lineRenderer = null;
+    [SerializeField] LaserDisplay laserDisplay = null;
 
     [Header("Settings")]
     [SerializeField] LayerMask layerMask;
-    [SerializeField, Range(0, 50)] int bounceMax = 10;
-    [SerializeField, Range(0, 10)] float rotationSpeed = 10f;
+    [SerializeField, Range(0, 1)] float laserSize = 0.01f;
+    [SerializeField, Range(0, 100)] int bounceMax = 10;
+    [SerializeField, Min(0)] float minAngle = 0.000000001f; // 11.4592982874 is ideal accuracy
 
     int bounceCount = 0;
+    List<SphereMesh> spheres = new List<SphereMesh>(); 
+
+    #endregion
+    /************************************************************/
+    #region Properties
+
+    public float Angle => transform.rotation.eulerAngles.x;
+    public float BounceCount => bounceCount;
 
     #endregion
     /************************************************************/
@@ -43,13 +53,13 @@ public class Laser : MonoBehaviour
     private void Start()
     {
         Refresh();
-        // gameObject.transform.f
     }
 
     private void Update()
     {
         Rotate();
         Refresh();
+        laserDisplay.SetText($"{transform.rotation.eulerAngles.x.ToString("F14")}º");
     }
 
     #endregion
@@ -58,15 +68,14 @@ public class Laser : MonoBehaviour
 
     public void Rotate()
     {
-        float min = 0.00000001f;
-        Vector3 minAngle = new Vector3(min, min, min) * rotationSpeed * Time.deltaTime;//MathUtils.Remap(rotationSpeed, 0, 10, 0, 0);
-        transform.Rotate(minAngle);
+        transform.Rotate(new Vector3(minAngle, minAngle, minAngle) * Time.deltaTime);
         // Debug.Log(transform.rotation.eulerAngles.ToString("F16"));
         //Debug.Log(transform.rotation.eulerAngles.x);
     }
 
     public void Refresh()
     {
+        lineRenderer.startWidth = lineRenderer.endWidth = laserSize;
         lineRenderer.positionCount = 0;
         bounceCount = 0;
 
@@ -74,6 +83,7 @@ public class Laser : MonoBehaviour
         Vector3 direction = transform.TransformDirection(transform.forward);
 
         AddLaserPoint(origin);
+        ClearSpheres();
         DoLaserBounce(origin, direction);
     }
 
@@ -86,11 +96,12 @@ public class Laser : MonoBehaviour
             //Debug.DrawRay(hit.point, hit.normal * 10f, Color.yellow);
             //Debug.DrawRay(hit.point, directionOut * 10f, Color.red);
             AddLaserPoint(hit.point);
+            TryAddSphere(hit.transform);
             if (bounceCount++ < bounceMax) DoLaserBounce(hit.point, directionOut);
         }
         else
         {
-            AddLaserPoint(origin + directionIn * 10f);
+            AddLaserPoint(origin + directionIn * 150f);
             //Debug.DrawRay(origin, directionIn * 1000, Color.white);
         }
     }
@@ -110,6 +121,24 @@ public class Laser : MonoBehaviour
         lineRenderer.SetPosition(index, point);
     }
 
+    private void TryAddSphere(Transform transform)
+    {
+        if (!transform.TryGetComponent<SphereMesh>(out SphereMesh sphere)) return;
+        if (spheres.Contains(sphere)) return;
+        
+        sphere.MeshRenderer.material = SphereManager.Instance.SphereMaterialLasered;
+        spheres.Add(sphere);
+    }
+
+    private void ClearSpheres()
+    {
+        foreach (SphereMesh sphere in spheres)
+        {
+            sphere.MeshRenderer.material = SphereManager.Instance.SphereMaterialDefault;
+        }
+        spheres.Clear();
+    }
+
     #endregion
 
     #endregion
@@ -122,6 +151,7 @@ public class Laser : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        Gizmos.color = Color.cyan;
         for (int i = 0; i < lineRenderer.positionCount; i++)
         {
             Gizmos.DrawSphere(lineRenderer.GetPosition(i), gizmosSphereRadius * 0.5f);

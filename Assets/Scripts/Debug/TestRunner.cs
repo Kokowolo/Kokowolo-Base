@@ -16,14 +16,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Kokowolo.Utilities;
+
 public class TestRunner : MonoBehaviour
 {
     /************************************************************/
     #region Fields
 
+    MeshCollider _meshCollider;
+
     #endregion
 	/************************************************************/
     #region Properties
+
+    MeshCollider MeshCollider => _meshCollider;
 
     #endregion
     /************************************************************/
@@ -31,7 +37,7 @@ public class TestRunner : MonoBehaviour
 
     private void Awake() 
     {
-        
+        Debug.Log(MeshCollider.name);
     }
 
     private void Start() 
