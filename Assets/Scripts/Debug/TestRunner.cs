@@ -6,9 +6,6 @@
  * Date Created: April 29, 2022
  * 
  * Additional Comments:
- *		While this file has been updated to better fit this project, the original version can be found here:
- *		https://catlikecoding.com/unity/tutorials/hex-map/
- *
  *		File Line Length: 120
  */
 

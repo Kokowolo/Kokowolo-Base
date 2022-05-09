@@ -61,7 +61,4 @@ sysinfo.txt
 *.DS_Store
 
 # Project Specific Files
-Assets/Packages
-Assets/Packages.meta
-
 
