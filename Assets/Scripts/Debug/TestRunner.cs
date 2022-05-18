@@ -20,13 +20,13 @@ public class TestRunner : MonoBehaviour
     /************************************************************/
     #region Fields
 
-    MeshCollider _meshCollider;
+
 
     #endregion
 	/************************************************************/
     #region Properties
 
-    MeshCollider MeshCollider => _meshCollider;
+
 
     #endregion
     /************************************************************/
@@ -34,7 +34,17 @@ public class TestRunner : MonoBehaviour
 
     private void Awake() 
     {
-        Debug.Log(MeshCollider.name);
+        Debug.Log(transform.childCount);
+        Transform bone = transform.Find("5");
+        Debug.LogWarning(bone);
+        
+        Debug.Log(transform.hierarchyCount);
+        bone = transform.RecursiveFind("5");
+        Debug.LogWarning(bone);
+
+        Debug.Log(transform.hierarchyCount);
+        bone = transform.RecursiveFind("53");
+        Debug.LogWarning(bone);
     }
 
     private void Start() 
