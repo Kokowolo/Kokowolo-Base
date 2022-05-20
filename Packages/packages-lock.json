@@ -16,6 +16,12 @@
         "com.unity.textmeshpro": "3.0.6"
       }
     },
+    "com.kokowolo.vfx": {
+      "version": "file:/Users/woll/Documents/Unity/Repos/Package-VFX",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "com.unity.burst": {
       "version": "1.6.5",
       "depth": 1,
