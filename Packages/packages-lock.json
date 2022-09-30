@@ -1,13 +1,13 @@
 {
   "dependencies": {
     "com.kokowolo.proceduralmesh": {
-      "version": "file:/Users/woll/Documents/Unity/Packages/Package-Procedural-Mesh",
+      "version": "file:D:/Unity/Packages/Package-Procedural-Mesh",
       "depth": 0,
       "source": "local",
       "dependencies": {}
     },
     "com.kokowolo.utilities": {
-      "version": "file:/Users/woll/Documents/Unity/Packages/Package-Utilities",
+      "version": "file:D:/Unity/Packages/Package-Utilities",
       "depth": 0,
       "source": "local",
       "dependencies": {
@@ -17,7 +17,7 @@
       }
     },
     "com.kokowolo.vfx": {
-      "version": "file:/Users/woll/Documents/Unity/Packages/Package-VFX",
+      "version": "file:D:/Unity/Packages/Package-VFX",
       "depth": 0,
       "source": "local",
       "dependencies": {}

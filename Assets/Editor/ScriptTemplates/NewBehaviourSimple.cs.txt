@@ -1,0 +1,49 @@
+/*
+ * File Name: NewBehaviourSimple.cs
+ * Description: This script is for ...
+ * 
+ * Author(s): Kokowolo, Will Lacey
+ * Date Created: September 30, 2022
+ * 
+ * Additional Comments:
+ *		File Line Length: 120
+ */
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class NewBehaviourSimple : MonoBehaviour
+{
+    /************************************************************/
+    #region Fields
+
+    [Tooltip("this is a float")]
+    [SerializeField, Range(0, 1)] float myFloat = 0f;
+
+    #endregion
+	/************************************************************/
+    #region Properties
+
+    #endregion
+    /************************************************************/
+    #region Functions
+
+    private void Awake()
+    {
+        
+    }
+
+    private void Start()
+    {
+
+    }
+
+    private void Update()
+    {
+
+    }
+
+    #endregion
+    /************************************************************/
+}
