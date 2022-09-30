@@ -20,13 +20,14 @@ public class TestRunner : MonoBehaviour
     /************************************************************/
     #region Fields
 
-
+    [SerializeField] TestRunner prefab;
 
     #endregion
 	/************************************************************/
     #region Properties
 
-
+    TestRunner MonoBehaviourPrefab => PrefabManager.Get<TestRunner>();
+    TestScriptableObject ScriptableObjectPrefab => PrefabManager.Get<TestScriptableObject>();
 
     #endregion
     /************************************************************/
@@ -34,22 +35,19 @@ public class TestRunner : MonoBehaviour
 
     private void Awake() 
     {
-        Debug.Log(transform.childCount);
-        Transform bone = transform.Find("5");
-        Debug.LogWarning(bone);
-        
-        Debug.Log(transform.hierarchyCount);
-        bone = transform.RecursiveFind("5");
-        Debug.LogWarning(bone);
-
-        Debug.Log(transform.hierarchyCount);
-        bone = transform.RecursiveFind("53");
-        Debug.LogWarning(bone);
+        Instantiate(PrefabManager.Get<TestDebugObject>());
     }
 
-    private void Start() 
+    private void Update() 
     {
-        
+        if (Input.GetMouseButtonDown(0)) 
+        {
+            Instantiate(MonoBehaviourPrefab);
+        } 
+        else if (Input.GetMouseButtonDown(1)) 
+        {
+            Debug.Log(ScriptableObjectPrefab.val);
+        }
     }
 
     private void OnDestroy() 
