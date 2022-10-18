@@ -166,7 +166,8 @@ GameObject:
   - component: {fileID: 802351983}
   - component: {fileID: 802351982}
   - component: {fileID: 802351981}
-  m_Layer: 0
+  - component: {fileID: 802351985}
+  m_Layer: 7
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -251,6 +252,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &802351985
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 802351980}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1121940250
 GameObject:
   m_ObjectHideFlags: 0
@@ -491,6 +505,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ea372e168d0d2746b4d65702ea8745b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 128
   prefab: {fileID: 5896755552266194871, guid: acf284e7f6641d149a7cc25d43f0fb48, type: 3}
   waitForSeconds: 3
 --- !u!4 &1665257478
@@ -635,7 +652,7 @@ GameObject:
   - component: {fileID: 1853330684}
   - component: {fileID: 1853330683}
   - component: {fileID: 1853330682}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
