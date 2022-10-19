@@ -65,7 +65,7 @@ public class TestRaycaster : MonoBehaviour
         Vector3 origin = Camera.main.ScreenToWorldPoint(InputManager.GetMouseScreenPoint());
         Vector3 destination = FindObjectOfType<Rotator>().transform.position;
         Color color = Color.white;
-        if (Raycasting.RaycastToWorldPosition(destination, origin, out RaycastHit hitInfo, layerMask))
+        if (Raycasting.RaycastToDestinationPoint(destination, origin, out RaycastHit hitInfo, layerMask))
         {
             Debug.Log("Hit");
         }
