@@ -36,14 +36,14 @@ public class TestRaycaster : MonoBehaviour
 
     private void Update()
     {
-        if (!InputManager.WasClickPressedThisFrame()) return;
+        if (!BaseInputManager.WasClickPressedThisFrame()) return;
 
         DrawRaycastToWorldPosition();
     }
 
     private void DrawRaycastFromMouseScreenPoint()
     {
-        Vector3 origin = Camera.main.ScreenToWorldPoint(InputManager.GetMouseScreenPoint());
+        Vector3 origin = Camera.main.ScreenToWorldPoint(BaseInputManager.GetMouseScreenPoint());
         float maxDistance = float.MaxValue;
         Color color = Color.white;
 
@@ -62,7 +62,7 @@ public class TestRaycaster : MonoBehaviour
 
     private void DrawRaycastToWorldPosition()
     {
-        Vector3 origin = Camera.main.ScreenToWorldPoint(InputManager.GetMouseScreenPoint());
+        Vector3 origin = Camera.main.ScreenToWorldPoint(BaseInputManager.GetMouseScreenPoint());
         Vector3 destination = FindObjectOfType<Rotator>().transform.position;
         Color color = Color.white;
         if (Raycasting.RaycastToDestinationPoint(destination, origin, out RaycastHit hitInfo, layerMask))

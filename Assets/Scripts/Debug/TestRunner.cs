@@ -20,14 +20,9 @@ public class TestRunner : MonoBehaviour
     /************************************************************/
     #region Fields
 
-    [SerializeField] TestRunner prefab;
-
     #endregion
 	/************************************************************/
     #region Properties
-
-    TestRunner MonoBehaviourPrefab => PrefabManager.Get<TestRunner>();
-    TestScriptableObject ScriptableObjectPrefab => PrefabManager.Get<TestScriptableObject>();
 
     #endregion
     /************************************************************/
@@ -35,24 +30,16 @@ public class TestRunner : MonoBehaviour
 
     private void Awake() 
     {
-        Instantiate(PrefabManager.Get<TestDebugObject>());
-    }
+        // Debug.LogWarning("asdasd");
+        LogManager.Log("Hiiii", gameObject);
+        LogManager.LogWarning("Warning Hiiii", gameObject);
+        LogManager.LogError("Error Hiiii", gameObject);
+        LogManager.Log($"<color=#00FF00>All files processed...</color>");
 
-    private void Update() 
-    {
-        if (Input.GetMouseButtonDown(0)) 
-        {
-            Instantiate(MonoBehaviourPrefab);
-        } 
-        else if (Input.GetMouseButtonDown(1)) 
-        {
-            Debug.Log(ScriptableObjectPrefab.val);
-        }
-    }
-
-    private void OnDestroy() 
-    {
-        
+        Debug.Log("2Hiiii", gameObject);
+        Debug.LogWarning("2Warning Hiiii", gameObject);
+        Debug.LogError("2Error Hiiii", gameObject);
+        Debug.Log($"2<color=#00FF00>All files processed...</color>");
     }
 
     #endregion
