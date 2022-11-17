@@ -69,11 +69,11 @@ public class GameLogger : ILogHandler
         var formattable = message as IFormattable;
         if (formattable != null)
         {
-            return "aaaa" + formattable.ToString(null, CultureInfo.InvariantCulture);
+            return formattable.ToString(null, CultureInfo.InvariantCulture);
         }
         else
         {
-            return "aaaa" + message.ToString();
+            return message.ToString();
         }
     }
 
