@@ -13,6 +13,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Kokowolo.Utilities;
+
 public class TestRunner : MonoBehaviour
 {
     /************************************************************/
