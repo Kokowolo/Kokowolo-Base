@@ -17,12 +17,10 @@ using Kokowolo.Utilities;
 
 public class TestRunner : MonoBehaviour
 {
-    /************************************************************/
-    #region Fields
-
-    #endregion
 	/************************************************************/
     #region Properties
+
+    public static TestRunner Instance => Singleton.Get<TestRunner>();
 
     #endregion
     /************************************************************/
@@ -30,26 +28,32 @@ public class TestRunner : MonoBehaviour
 
     private void Awake()
     {
-        List<int> ints = new List<int>();
+        if (!Singleton.TrySet(this)) return; 
 
-        ints.Add(3);   
-        ints.Add(2);
-        ints.Add(1);
+        // ^ handles possible second instance when reloading scene
+        // continue...
 
-        LogList(ints);
-
-        ints.Swap(0, 2);
-
-        LogList(ints);
+        Debug.Log("Awake");
     }
-    
-    private void LogList<T>(List<T> list)
+
+    private void OnDestroy()
     {
-        Debug.Log("Logging List");
-        foreach (T t in list)
-        {
-            Debug.Log(t.ToString());
-        }
+        if (!Singleton.IsSingleton(this)) return;
+
+        // ^ handles possible second instance when reloading scene
+        // continue...
+
+        Debug.Log("OnDestroy");
+    }
+
+    private void Start()
+    {
+        Debug.Log("Start");
+    }
+
+    private void Update()
+    {
+        Debug.Log("Update");
     }
 
     #endregion

@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "com.kokowolo.grid": "file:/Users/woll/Documents/Unity/Packages/Package-Grid",
+    "com.kokowolo.pathfinding": "file:/Users/woll/Documents/Unity/Packages/Package-Pathfinding",
     "com.kokowolo.proceduralmesh": "file:/Users/woll/Documents/Unity/Packages/Package-Procedural-Mesh",
     "com.kokowolo.utilities": "file:/Users/woll/Documents/Unity/Packages/Package-Utilities",
     "com.kokowolo.vfx": "file:/Users/woll/Documents/Unity/Packages/Package-VFX",

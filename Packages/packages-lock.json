@@ -1,5 +1,17 @@
 {
   "dependencies": {
+    "com.kokowolo.grid": {
+      "version": "file:/Users/woll/Documents/Unity/Packages/Package-Grid",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
+    "com.kokowolo.pathfinding": {
+      "version": "file:/Users/woll/Documents/Unity/Packages/Package-Pathfinding",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "com.kokowolo.proceduralmesh": {
       "version": "file:/Users/woll/Documents/Unity/Packages/Package-Procedural-Mesh",
       "depth": 0,
