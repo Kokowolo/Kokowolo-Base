@@ -24,6 +24,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
 
     [SerializeField] private LayerMask gridMapLayerMask;
     [SerializeField] private LayerMask gridSurfaceLayerMask;
+    [SerializeField] private LayerMask gridSurfaceSoftLayerMask;
     [SerializeField] private string gridTag;
 
     private GridCell cellA;
@@ -47,16 +48,16 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     {
         if (Input.GetMouseButtonDown(0))
         {
-            if (cellA != null) GridMap.Instance.Visual.HideCursor(cellA.Coordinates);
-            cellA = GridMap.Instance.GetCell(GridCursorController.Instance.Coordinates);
-            GridMap.Instance.Visual.ShowCursor(cellA.Coordinates, Color.blue);
+            if (cellA != null) GridMapVisual.Instance.HideCursor(cellA.Coordinates);
+            cellA = GridManager.Map.GetCell(GridCursorController.Instance.Coordinates) as GridCell;
+            GridMapVisual.Instance.ShowCursor(cellA.Coordinates, Color.blue);
             Route();
         }
         if (Input.GetMouseButtonDown(1))
         {
-            if (cellB != null) GridMap.Instance.Visual.HideCursor(cellB.Coordinates);
-            cellB = GridMap.Instance.GetCell(GridCursorController.Instance.Coordinates);
-            GridMap.Instance.Visual.ShowCursor(cellB.Coordinates, Color.red);
+            if (cellB != null) GridMapVisual.Instance.HideCursor(cellB.Coordinates);
+            cellB = GridManager.Map.GetCell(GridCursorController.Instance.Coordinates) as GridCell;
+            GridMapVisual.Instance.ShowCursor(cellB.Coordinates, Color.red);
             Route();
         }
     }
@@ -65,16 +66,15 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     {
         foreach (Node node in searchPath)
         {
-            GridMap.Instance.Visual.HidePathfinding((node.Object as GridCell).Coordinates);
+            GridMapVisual.Instance.HidePathfinding((node.Object as GridCell).Coordinates);
         }
         if (cellA != cellB && cellA != null && cellB != null)
         {
-            TestGridPathfinding pathfinding = FindObjectOfType<TestGridPathfinding>(); 
-            searchPath = AStarPathfinding.Search(pathfinding, cellA.Node, cellB.Node);
+            searchPath = AStarPathfinding.Search(TestGridPathfinding.Instance, cellA.Node, cellB.Node);
 
             foreach (Node node in searchPath)
             {
-                GridMap.Instance.Visual.ShowPathfinding((node.Object as GridCell).Coordinates);
+                GridMapVisual.Instance.ShowPathfinding((node.Object as GridCell).Coordinates);
             }
         }
     }
@@ -91,18 +91,33 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
         return gridSurfaceLayerMask;
     }
 
+    public LayerMask GetGridSurfaceSoftLayerMask()
+    {
+        return gridSurfaceSoftLayerMask;
+    }
+
     public string GetGridTag()
     {
         return gridTag;
     }
 
-    // public IGridObject GetGridObject(GridCoordinates coordinates)
-    // {
-    //     return null;
-    // }
+    public GridCell GetGridCell(GridCoordinates coordinates)
+    {
+        return new TestGridCell(coordinates);
+    }
+
+    public void ShowCursor(GridCoordinates coordinates)
+    {
+        GridMapVisual.Instance.ShowCursor(coordinates);
+    }
+
+    public void HideCursor(GridCoordinates coordinates)
+    {
+        GridMapVisual.Instance.HideCursor(coordinates);
+    }
 
     #endregion
-    
+
     #endregion
     /************************************************************/
 }

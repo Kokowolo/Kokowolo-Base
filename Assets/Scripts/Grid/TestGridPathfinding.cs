@@ -16,7 +16,7 @@ using UnityEngine;
 using Kokowolo.Grid;
 using Kokowolo.Pathfinding;
 
-public class TestGridPathfinding : MonoBehaviour, IPathfinding
+public class TestGridPathfinding : IPathfinding
 {
     /************************************************************/
     #region Fields
@@ -24,6 +24,19 @@ public class TestGridPathfinding : MonoBehaviour, IPathfinding
     #endregion
 	/************************************************************/
     #region Properties
+
+    public static TestGridPathfinding _instance;
+    public static TestGridPathfinding Instance     
+    {
+        get 
+        {
+            if (_instance == null) 
+            {
+                _instance = new TestGridPathfinding();
+            }
+            return _instance;
+        }
+    }   
 
     #endregion
     /************************************************************/
