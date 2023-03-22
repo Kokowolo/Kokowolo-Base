@@ -22,14 +22,24 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     /************************************************************/
     #region Fields
 
+    [Header("Cached References")]
+    [SerializeField] private GameObject debugGridTransformVisual;
+
+    [Header("Grid Pipeline Settings")]
     [SerializeField] private LayerMask gridMapLayerMask;
     [SerializeField] private LayerMask gridSurfaceLayerMask;
     [SerializeField] private LayerMask gridSurfaceSoftLayerMask;
     [SerializeField] private string gridTag;
 
+    [Header("Other Settings")]
+    [SerializeField] private int range = 1;
+
     private GridCell cellA;
     private GridCell cellB;
+    private GridCell cellC;
     private NodePath searchPath = new NodePath();
+
+    GridTransform gridTransform;
 
     #endregion
     /************************************************************/
@@ -39,6 +49,13 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     /************************************************************/
     #region Functions
 
+    private void Awake() 
+    {
+        gridTransform = new GridTransform();
+        gridTransform.Init(transform);
+        SetDebugGridTransformVisual();
+    }
+
     private void Update()
     {
         HandleInput();
@@ -46,20 +63,49 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
 
     private void HandleInput()
     {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            GridManager.SetActive(!GridManager.Instance.gameObject.activeSelf);
+        }
         if (Input.GetMouseButtonDown(0))
         {
-            if (cellA != null) GridMapVisual.Instance.HideCursor(cellA.Coordinates);
-            cellA = GridManager.Map.GetCell(GridCursorController.Instance.Coordinates) as GridCell;
-            GridMapVisual.Instance.ShowCursor(cellA.Coordinates, Color.blue);
-            Route();
+            ShowCell(ref cellA, Color.blue);
         }
         if (Input.GetMouseButtonDown(1))
         {
-            if (cellB != null) GridMapVisual.Instance.HideCursor(cellB.Coordinates);
-            cellB = GridManager.Map.GetCell(GridCursorController.Instance.Coordinates) as GridCell;
-            GridMapVisual.Instance.ShowCursor(cellB.Coordinates, Color.red);
+            ShowCell(ref cellB, Color.red);
+        }
+        if (Input.GetMouseButtonDown(2))
+        {
+            ShowCell(ref cellC, Color.yellow);
+        }
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            gridTransform.SetCoordinates(GridCursorController.Instance.Coordinates);
+            SetDebugGridTransformVisual();
+            StartCoroutine(HighlightForwardCells());
+        }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            gridTransform.Direction = gridTransform.Direction.Next();
+            StartCoroutine(HighlightForwardCells());
+            SetDebugGridTransformVisual();
+        }
+        if (Input.GetKeyDown(KeyCode.F))
+        {
             Route();
         }
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            DirectionCheck();
+        }
+    }
+
+    private void ShowCell(ref GridCell cell, Color color)
+    {
+        if (cell != null) GridMapVisual.Instance.HideCursor(cell.Coordinates);
+        cell = GridManager.Map.GetCell(GridCursorController.Instance.Coordinates) as GridCell;
+        GridMapVisual.Instance.ShowCursor(cell.Coordinates, color);
     }
 
     private void Route()
@@ -76,6 +122,33 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
             {
                 GridMapVisual.Instance.ShowPathfinding((node.Object as GridCell).Coordinates);
             }
+        }
+    }
+
+    private void DirectionCheck()
+    {
+        GridDirection inDirection = GridCoordinates.GetDirectionToCoordinates(cellC.Coordinates, cellA.Coordinates);
+        GridDirection outDirection = GridCoordinates.GetDirectionToCoordinates(cellA.Coordinates, cellB.Coordinates);
+        Debug.Log($"In: {inDirection}, Out: {outDirection}, ${inDirection.Distance(outDirection)}");
+    }
+
+    private void SetDebugGridTransformVisual()
+    {
+        debugGridTransformVisual.transform.position = GridPositioning.GetPosition(gridTransform.Coordinates);
+        debugGridTransformVisual.transform.rotation = GridMetrics.GetRotationFromDirection(gridTransform.Direction);
+    }
+
+    private IEnumerator HighlightForwardCells()
+    {
+        List<GridCell> cells = gridTransform.GetForwardCells(range);
+        foreach (GridCell cell in cells)
+        {
+            GridMapVisual.Instance.ShowCursor(cell.Coordinates, Color.magenta);
+        }
+        yield return new WaitForSeconds(1f);
+        foreach (GridCell cell in cells)
+        {
+            GridMapVisual.Instance.HideCursor(cell.Coordinates);
         }
     }
 

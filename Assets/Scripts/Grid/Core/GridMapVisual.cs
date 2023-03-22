@@ -38,24 +38,21 @@ namespace Kokowolo.Grid
 
         protected override void MonoSingleton_Awake() 
         {
+            enabled = false;
+            
             GridManager.OnGridEnabled += Handle_GridManager_OnGridEnabled;
             GridManager.OnGridDisabled += Handle_GridManager_OnGridDisabled;
+
+            gridCellVisuals = new GridStructure<GridCellVisual>(
+                GridManager.Map.CellCountY, GridManager.Map.CellCountZ, GridManager.Map.CellCountX
+            );
+            gridCellVisuals.Initialize(CreateGridObject);
         }
 
         protected override void MonoSingleton_OnDestroy()
         {
             GridManager.OnGridEnabled -= Handle_GridManager_OnGridEnabled;
             GridManager.OnGridDisabled -= Handle_GridManager_OnGridDisabled;
-        }
-
-        private void Start()
-        {
-            enabled = false;
-            
-            gridCellVisuals = new GridStructure<GridCellVisual>(
-                GridManager.Map.CellCountY, GridManager.Map.CellCountZ, GridManager.Map.CellCountX
-            );
-            gridCellVisuals.Initialize(CreateGridObject);
         }
 
         private GridCellVisual CreateGridObject(GridCoordinates coordinates)
