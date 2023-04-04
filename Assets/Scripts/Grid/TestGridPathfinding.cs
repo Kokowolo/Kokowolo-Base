@@ -52,6 +52,13 @@ public class TestGridPathfinding : IPathfinding
         return true;
     }
 
+    public int GetDistanceBetweenNodes(Node start, Node end)
+    {
+        GridCell startCell = start.Object as GridCell;
+        GridCell endCell = end.Object as GridCell;
+        return startCell.Coordinates.GetDistanceTo(endCell.Coordinates, ignoreFallDistance: false);
+    }
+
     public int GetMoveCostBetweenNodes(Node start, Node end)
     {
         return 1;

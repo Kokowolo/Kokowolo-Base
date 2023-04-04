@@ -1,5 +1,11 @@
 {
   "dependencies": {
+    "com.kokowolo.charactercustomization": {
+      "version": "file:/Users/woll/Documents/Unity/Packages/Package-Character-Customization",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "com.kokowolo.grid": {
       "version": "file:/Users/woll/Documents/Unity/Packages/Package-Grid",
       "depth": 0,

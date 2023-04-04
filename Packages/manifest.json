@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.kokowolo.charactercustomization": "file:/Users/woll/Documents/Unity/Packages/Package-Character-Customization",
     "com.kokowolo.grid": "file:/Users/woll/Documents/Unity/Packages/Package-Grid",
     "com.kokowolo.pathfinding": "file:/Users/woll/Documents/Unity/Packages/Package-Pathfinding",
     "com.kokowolo.proceduralmesh": "file:/Users/woll/Documents/Unity/Packages/Package-Procedural-Mesh",
