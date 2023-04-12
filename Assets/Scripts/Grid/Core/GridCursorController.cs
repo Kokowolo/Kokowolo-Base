@@ -126,17 +126,15 @@ namespace Kokowolo.Grid
         {
             if (visualJob == null) 
             {
-                List<GridCoordinates> list = new List<GridCoordinates>() { Coordinates };
                 visualJob = GridManager.Visual.CreateVisualJob(
                     GridMapVisualJob.JobType.Singles, 
-                    list,
+                    Coordinates,
                     priority: 10
                 );
             }
             else
             {
-                List<GridCoordinates> list = new List<GridCoordinates>() { Coordinates };
-                visualJob.Update(list);
+                visualJob.Update(Coordinates);
             }
         }
 

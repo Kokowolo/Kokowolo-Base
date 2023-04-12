@@ -35,6 +35,13 @@ public class TestGridCell : GridCell
     /************************************************************/
     #region Functions
 
+    public static implicit operator GridCoordinates(TestGridCell instance)
+    {
+        if (instance == null) return GridCoordinates.Invalid;
+        
+        return instance.Coordinates;
+    }
+
     public TestGridCell(GridCoordinates coordinates) : base(coordinates)
     {
     }

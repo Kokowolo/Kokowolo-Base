@@ -81,7 +81,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
 
             visualJob = GridManager.Visual.CreateVisualJob(
                 GridMapVisualJob.JobType.Group, 
-                visualCells.ToCoordinatesList(), 
+                visualCells, 
                 color: MathKoko.GetRandomColor() * 0.8f
             );
         }
@@ -91,7 +91,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
             if (cell != null && !visualCells.Contains(cell)) 
             {
                 visualCells.Add(cell);
-                visualJob.Update(visualCells.ToCoordinatesList());
+                visualJob.Update(visualCells);
             }
         }
         if (Input.GetMouseButtonUp(0))
@@ -104,7 +104,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
             if (visualJobs.Count > 0)
             {
                 visualJob = visualJobs[visualJobs.Count - 1];
-                GridManager.Visual.DestroyVisualJob(visualJob);
+                GridManager.Visual.RemoveVisualJob(visualJob);
                 visualJobs.RemoveAt(visualJobs.Count - 1);
             }
         }
@@ -214,25 +214,25 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
         List<GridCell> cells = gridTransform.GetForwardCells(range);
         var job = GridManager.Visual.CreateVisualJob(
             GridMapVisualJob.JobType.Singles, 
-            cells.ToCoordinatesList(), 
+            cells, 
             color: Color.magenta
         );
         yield return new WaitForSeconds(1f);
-        GridManager.Visual.DestroyVisualJob(job);
+        GridManager.Visual.RemoveVisualJob(job);
     }
 
     private IEnumerator ShowAllSearchedNodes()
     {
         List<Node> nodes = AStarPathfinding.GetAllSearchedNodes(TestGridPathfinding.Instance, cellA.Node, range);
-        List<GridCoordinates> coordinatesList = ListPool.Get<GridCoordinates>();
+        List<GridCell> cells = ListPool.Get<GridCell>();
         foreach (Node node in nodes)
         {
-            coordinatesList.Add((node.Object as GridCell).Coordinates);
+            cells.Add((node.Object as GridCell));
         }
 
-        var job = GridManager.Visual.CreateVisualJob(GridMapVisualJob.JobType.Minis, coordinatesList);
+        var job = GridManager.Visual.CreateVisualJob(GridMapVisualJob.JobType.Minis, cells);
         yield return new WaitForSeconds(1f);
-        GridManager.Visual.DestroyVisualJob(job);
+        GridManager.Visual.RemoveVisualJob(job);
     }
 
     #region Interface Functions
