@@ -38,6 +38,8 @@ public class TestGridPathfinding : IPathfinding
         }
     }   
 
+    public bool CanRepeatNodesInPath { get; private set; } = false;
+
     #endregion
     /************************************************************/
     #region Functions
@@ -48,15 +50,21 @@ public class TestGridPathfinding : IPathfinding
     }
 
     public bool IsValidMoveBetweenNodes(Node start, Node end)
-    {
-        return true;
+    {  
+        int height = 2;
+        bool isValid = true;
+        // Check for Blocking Obstacle
+        isValid &= !GridManager.Map.HasBlockingObstacleTowardsCell(start.GetCell(), end.GetCell(), height);
+
+        // TODO: Check for Enough Vertical Space
+        // GridManager.Map.GetCellsBelowCoordinates
+
+        return isValid;
     }
 
     public int GetDistanceBetweenNodes(Node start, Node end)
     {
-        GridCell startCell = start.Object as GridCell;
-        GridCell endCell = end.Object as GridCell;
-        return startCell.Coordinates.GetDistanceTo(endCell.Coordinates, ignoreFallDistance: false);
+        return start.GetCell().Coordinates.GetDistanceTo(end.GetCell().Coordinates, ignoreFallDistance: false);
     }
 
     public int GetMoveCostBetweenNodes(Node start, Node end)

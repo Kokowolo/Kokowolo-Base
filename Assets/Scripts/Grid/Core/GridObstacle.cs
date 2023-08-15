@@ -37,7 +37,7 @@ namespace Kokowolo.Grid
 
         private void Start()
         {
-            GridCoordinates coordinates = GridCoordinates.GetGridCoordinates(transform.position);
+            GridCoordinates coordinates = new GridCoordinates(transform.position);
             GridCell cell = GridManager.Map.GetCell(coordinates);
             if (cell != null) cell.Node.IsExplorable = false;
         }

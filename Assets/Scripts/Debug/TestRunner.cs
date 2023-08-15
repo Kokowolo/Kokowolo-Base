@@ -22,10 +22,6 @@ public class TestRunner : MonoBehaviour//, IPoolable<TestRunner>
     /************************************************************/
     #region Fields
 
-    [SerializeField] private TestMonoPoolable prefab = null;
-
-    List<TestMonoPoolable> monos = new List<TestMonoPoolable>();
-
     #endregion
     /************************************************************/
     #region Properties
@@ -34,33 +30,23 @@ public class TestRunner : MonoBehaviour//, IPoolable<TestRunner>
     /************************************************************/
     #region Functions
 
-    private void Update() 
+    private void Awake() 
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            TestMonoPoolable poolable = PoolSystem.Get<TestMonoPoolable>();
-            monos.Add(poolable);
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            TestMonoPoolable poolable = Pop();
-            if (poolable) PoolSystem.Add(poolable);
-        }
-    }
-
-    private TestMonoPoolable Pop()
-    {
-        if (monos.Count == 0)
-        {
-            Debug.LogWarning("No more monos");
-            return null;
-        }
-        else
-        {
-            TestMonoPoolable poolable = monos[monos.Count - 1];
-            monos.RemoveAt(monos.Count - 1);
-            return poolable;
-        }
+        List<int> ints = new List<int>();
+        Debug.Log(ints.Capacity);
+        ints.Add(0);
+        ints.Add(1);
+        ints.Add(2);
+        ints.Add(3);
+        ints.Add(4);
+        Debug.Log(ints.Capacity);
+        Debug.Log(ints[1]);
+        ints.Clear();
+        Debug.Log(ints.Capacity);
+        Debug.Log(ints[1]);
+        ints.Capacity = 3;
+        Debug.Log(ints.Capacity);
+        Debug.Log(ints[1]);
     }
 
     #endregion

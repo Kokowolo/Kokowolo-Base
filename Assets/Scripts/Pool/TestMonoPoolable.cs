@@ -47,7 +47,7 @@ public class TestMonoPoolable : MonoBehaviour, IPoolable<TestMonoPoolable>
         gameObject.transform.SetParent(PoolSystem.Instance.transform);
     }
 
-    public void OnGetPoolable()
+    public void OnGetPoolable(params object[] args)
     {
         gameObject.SetActive(true);
         gameObject.transform.SetParent(FindObjectOfType<TestRunner>().transform);

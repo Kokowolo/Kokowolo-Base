@@ -91,7 +91,7 @@ namespace Kokowolo.Grid
                 // }
                 // else
                 // {
-                    coordinates = GridCoordinates.GetGridCoordinates(CursorManager.HitInfo.point);
+                    coordinates = new GridCoordinates(CursorManager.HitInfo.point);
                 // }
             }   
             return coordinates;
