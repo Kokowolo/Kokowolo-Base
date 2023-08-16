@@ -16,7 +16,6 @@ using UnityEngine;
 using Kokowolo.Grid;
 using Kokowolo.Pathfinding;
 using Kokowolo.Utilities;
-using MathKoko = Kokowolo.Utilities.Math;
 
 public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
 {
@@ -267,7 +266,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
             cells.Add(node.GetCell());
         }
 
-        var job = GridManager.Visual.CreateVisualJob(GridMapVisualJob.JobType.Minis, cells, color: Math.GetRandomColor());
+        var job = GridManager.Visual.CreateVisualJob(GridMapVisualJob.JobType.Minis, cells, color: MathKoko.GetRandomColor());
         yield return new WaitForSeconds(1f);
         GridManager.Visual.RemoveVisualJob(job);
     }

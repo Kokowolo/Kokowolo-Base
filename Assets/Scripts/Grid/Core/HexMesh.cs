@@ -15,7 +15,7 @@ using UnityEngine;
 
 using Kokowolo.Grid;
 using Kokowolo.ProceduralMesh;
-using MathKoko = Kokowolo.Utilities.Math;
+using Kokowolo.Utilities;
 
 public class HexMesh : ProceduralMesh
 {
