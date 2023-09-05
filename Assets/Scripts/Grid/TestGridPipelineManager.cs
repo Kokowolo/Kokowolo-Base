@@ -33,16 +33,17 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
 
     [Header("Other Settings")]
     [SerializeField] private int range = 1;
+    [SerializeField] private GridTransform gridTransform;
 
     private (GridCell, GridMapVisualJob)[] cellJobs = new (GridCell, GridMapVisualJob)[3];
     private NodePath searchPath = new NodePath();
     GridMapVisualJob searchPathVisualJob;
 
-    GridTransform gridTransform;
-
     GridMapVisualJob visualJob;
     List<GridMapVisualJob> visualJobs = new List<GridMapVisualJob>();
     List<GridCell> visualCells = new List<GridCell>();
+
+    GridMapVisualJob gridTransformVisualJob;
 
     private bool mode = true;
  
@@ -50,15 +51,24 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     /************************************************************/
     #region Properties
 
+    // Input
+    private bool Button_Switch => Input.GetKeyDown(KeyCode.Tab);
+
+    private bool Button_Click => Input.GetMouseButtonDown(0);
+    private bool Button_Click_Hold => Input.GetMouseButton(0);
+    private bool Button_Click_Release => Input.GetMouseButtonUp(0);
+
+    private bool Button_Undo => Input.GetMouseButtonDown(1);
+
     #endregion
     /************************************************************/
     #region Functions
 
     private void Awake() 
     {
-        gridTransform = new GridTransform();
+        LogManager.Log("hi");
         gridTransform.Init(transform);
-        SetDebugGridTransformVisual();
+        RefreshGridTransform();
     }
 
     private void Update()
@@ -71,7 +81,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     private void HandleInput()
     {
         // Switch Mode
-        if (Input.GetKeyDown(KeyCode.Tab)) mode = !mode;
+        if (Button_Switch) mode = !mode;
 
         if (mode)
         {
@@ -85,7 +95,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
 
     private void HandleMode1Input()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Button_Click)
         {
             GridCell cell = GridCursorController.Instance.Cell;
             if (cell != null && !visualCells.Contains(cell)) 
@@ -99,7 +109,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
                 color: MathKoko.GetRandomColor() * 0.8f
             );
         }
-        else if (Input.GetMouseButton(0))
+        else if (Button_Click_Hold)
         {
             GridCell cell = GridCursorController.Instance.Cell;
             if (cell != null && !visualCells.Contains(cell)) 
@@ -108,12 +118,12 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
                 visualJob.Update(visualCells);
             }
         }
-        if (Input.GetMouseButtonUp(0))
+        if (Button_Click_Release)
         {
             visualCells.Clear();
             visualJobs.Add(visualJob);
         }
-        if (Input.GetMouseButtonDown(1))
+        if (Button_Undo)
         {
             if (visualJobs.Count > 0)
             {
@@ -138,11 +148,11 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
         {
             range++;
         }
-        if (Input.GetMouseButtonDown(0))
+        if (Button_Click)
         {
             ShowCellJob(0, Color.blue);
         }
-        if (Input.GetMouseButtonDown(1))
+        if (Button_Undo)
         {
             ShowCellJob(1, Color.red);
         }
@@ -152,15 +162,13 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
         }
         if (Input.GetKeyDown(KeyCode.T))
         {
-            gridTransform.SetCoordinates(GridCursorController.Instance.Coordinates);
-            SetDebugGridTransformVisual();
+            RefreshGridTransform(coordinates: GridCursorController.Instance.Coordinates);
             StartCoroutine(ShowForwardCells());
         }
         if (Input.GetKeyDown(KeyCode.R))
         {
-            gridTransform.SetDirection(gridTransform.Direction.Next());
+            RefreshGridTransform(direction: gridTransform.Direction.Next());
             StartCoroutine(ShowForwardCells());
-            SetDebugGridTransformVisual();
         }
         if (Input.GetKeyDown(KeyCode.F))
         {
@@ -238,8 +246,35 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
         Debug.Log($"In: {inDirection}, Out: {outDirection}, ${inDirection.Distance(outDirection)}");
     }
 
-    private void SetDebugGridTransformVisual()
+    private void RefreshGridTransform(GridCoordinates? coordinates = null, GridDirection? direction = null)
     {
+        // set coordinates
+        if (coordinates != null)
+        {
+            gridTransform.SetCoordinates((GridCoordinates) coordinates);
+        }
+
+        // set direction
+        if (direction != null)
+        {
+            gridTransform.SetDirection((GridDirection) direction);
+        }
+
+        // set GridTransform visual
+        if (gridTransformVisualJob == null)
+        {
+            gridTransformVisualJob = GridManager.Visual.CreateVisualJob(
+                GridMapVisualJob.JobType.Group, 
+                gridTransform.GetOverlappingCoordinatesList(), 
+                color: Color.magenta
+            );
+        }
+        else
+        {
+            gridTransformVisualJob.Update(gridTransform.GetOverlappingCoordinatesList());
+        }
+
+        // SetDebugGridTransformVisual
         debugGridTransformVisual.transform.position = GridPositioning.GetPosition(gridTransform.Coordinates);
         debugGridTransformVisual.transform.rotation = GridMetrics.GetRotationFromDirection(gridTransform.Direction);
     }

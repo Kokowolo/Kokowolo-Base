@@ -99,10 +99,10 @@ public class HexMesh : ProceduralMesh
     #region Debug
     #if UNITY_EDITOR
 
-    private void OnValidate() 
-    {
-        if (Mesh) Refresh();
-    }
+    // private void OnValidate() 
+    // {
+    //     if (Mesh) Refresh();
+    // }
 
     #endif
     #endregion

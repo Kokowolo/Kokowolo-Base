@@ -36,9 +36,9 @@ public class TestGridPathfinding : IPathfinding
             }
             return _instance;
         }
-    }   
+    }
 
-    public bool CanRepeatNodesInPath { get; private set; } = false;
+    public bool CanCreatePathsWithRepeatNodes { get; private set; } = false;
 
     #endregion
     /************************************************************/
@@ -72,11 +72,11 @@ public class TestGridPathfinding : IPathfinding
         return 1;
     }
 
-    public bool IsPathTrimmable(NodePath path)
+    public bool IsPathOutsideMovementRange(NodePath path)
     {
         return false;
     }
-    
+
     #endregion
     /************************************************************/
 }
