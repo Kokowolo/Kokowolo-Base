@@ -41,12 +41,18 @@ public class TestLogManagerRunner : MonoBehaviour
         LogManager.LogWarning(logger, "hi again");
         LogManager.LogError("bye");
 
-        // CONSOLE SHOULD LOOK LIKE
+        System.Exception exception = new System.Exception("exception message!");
+        LogManager.LogException(exception);
+        LogManager.LogError("unreachable message");
+
+        // CONSOLE SHOULD LOOK LIKE (ignoring tags)
         // hi
         // hi but green (green)
         // hi but you cant see me
         // hi again (warning)
         // bye (error)
+        // System.Exception: exception message! (exception)
+        // Exception: exception message! (System.Exception)
     }
 
     #endregion

@@ -13,7 +13,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Kokowolo.Utilities//.Diagnostics
+namespace Kokowolo.Utilities//.Analytics
 {
     [CreateAssetMenu(menuName = "Kokowolo/Utilities/LogManager Profile", fileName = LogManager.LogManagerProfileString)]
     public class LogManagerProfile : ScriptableObject
@@ -22,12 +22,14 @@ namespace Kokowolo.Utilities//.Diagnostics
         #region Fields
 
         [SerializeField] private bool _LogMessageWithClassTag = true;
+        [SerializeField] private bool _ThrowWhenLoggingException = true;
 
         #endregion
         /************************************************************/
         #region Properties
 
         public bool LogMessageWithClassTag => _LogMessageWithClassTag;
+        public bool ThrowWhenLoggingException => _ThrowWhenLoggingException;
 
         #endregion
         /************************************************************/

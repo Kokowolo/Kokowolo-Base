@@ -20,7 +20,7 @@ using System.IO;
 using System.Globalization;
 using System.Text;
 
-namespace Kokowolo.Utilities//.Diagnostics
+namespace Kokowolo.Utilities//.Analytics
 {
     public static class LogManager
     {
@@ -63,6 +63,7 @@ namespace Kokowolo.Utilities//.Diagnostics
 
         // default properties without an initialized LogManagerProfile
         private static bool LogMessageWithClassTag => !Profile || Profile.LogMessageWithClassTag;
+        private static bool ThrowWhenLoggingException => Profile && Profile.ThrowWhenLoggingException;
 
         // other properties
         private static bool LogMessageWithColorTag => Application.isEditor;
@@ -104,11 +105,37 @@ namespace Kokowolo.Utilities//.Diagnostics
         public static void LogException(object message, UnityEngine.Object context = null, Color? color = null)
         {
             Log(LogType.Exception, defaultLogger, message, context, color);
+            if (ThrowWhenLoggingException)
+            {
+                throw new Exception(StringBuilder.ToString());
+            }
+        }
+
+        public static void LogException(Exception exception, UnityEngine.Object context = null, Color? color = null)
+        {
+            Log(LogType.Exception, defaultLogger, exception, context, color);
+            if (ThrowWhenLoggingException)
+            {
+                throw exception;
+            }
         }
 
         public static void LogException(Logger logger, object message, UnityEngine.Object context = null, Color? color = null)
         {
             Log(LogType.Exception, logger, message, context, color);
+            if (ThrowWhenLoggingException)
+            {
+                throw new Exception(StringBuilder.ToString());
+            }
+        }
+
+        public static void LogException(Logger logger, Exception exception, UnityEngine.Object context = null, Color? color = null)
+        {
+            Log(LogType.Exception, logger, exception, context, color);
+            if (ThrowWhenLoggingException)
+            {
+                throw exception;
+            }
         }
 
         // [System.Diagnostics.Conditional("UNITY_EDITOR")]
