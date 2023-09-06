@@ -9,7 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 2140317478, guid: 1432b7660130ddc40ac342f2ae0a407a, type: 3}
+  m_Script: {fileID: 2140317478, guid: acff9f6758b46f0469f61abb5f9e9525, type: 3}
   m_Name: LogManager Profile
   m_EditorClassIdentifier: 
   _LogMessageWithClassTag: 1
+  _ThrowWhenLoggingException: 1

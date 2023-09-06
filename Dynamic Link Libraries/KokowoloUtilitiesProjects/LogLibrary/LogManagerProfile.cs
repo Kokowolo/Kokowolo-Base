@@ -22,7 +22,7 @@ namespace Kokowolo.Utilities//.Analytics
         #region Fields
 
         [SerializeField] private bool _LogMessageWithClassTag = true;
-        [SerializeField] private bool _ThrowWhenLoggingException = true;
+        [SerializeField] private bool _ThrowWhenLoggingException = false;
 
         #endregion
         /************************************************************/

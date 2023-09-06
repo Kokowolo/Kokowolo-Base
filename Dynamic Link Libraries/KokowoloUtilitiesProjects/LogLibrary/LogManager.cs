@@ -16,7 +16,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using System;
-using System.IO;
+// using System.Reflection;
 using System.Globalization;
 using System.Text;
 
@@ -27,11 +27,12 @@ namespace Kokowolo.Utilities//.Analytics
         /************************************************************/
         #region Fields
 
-        public const string LogManagerProfileString = "LogManager Profile";
-        private static readonly Logger defaultLogger = new Logger(Debug.unityLogger.logHandler);
+        internal const string LogManagerProfileString = "LogManager Profile";
 
         private static bool hasAttemptedLoad;
         private static int stackTraceDepth;
+
+        private static Logger unityLogger;
 
         #endregion
         /************************************************************/
@@ -48,7 +49,7 @@ namespace Kokowolo.Utilities//.Analytics
         }
 
         private static LogManagerProfile _Profile;
-        private static LogManagerProfile Profile
+        public static LogManagerProfile Profile
         {
             get
             {
@@ -58,6 +59,15 @@ namespace Kokowolo.Utilities//.Analytics
                     _Profile = Resources.Load<LogManagerProfile>(LogManagerProfileString);
                 }
                 return _Profile;
+            }
+        }
+
+        public static Logger UnityLogger// => Debug.unityLogger.logHandler; this doesn't work and i don't get it :(
+        {
+            get
+            {
+                TryInitializeUnityLogger();
+                return unityLogger;
             }
         }
 
@@ -74,7 +84,7 @@ namespace Kokowolo.Utilities//.Analytics
 
         public static void Log(object message, UnityEngine.Object context = null, Color? color = null)
         {
-            Log(LogType.Log, defaultLogger, message, context, color);
+            Log(LogType.Log, UnityLogger, message, context, color);
         }
 
         public static void Log(Logger logger, object message, UnityEngine.Object context = null, Color? color = null)
@@ -84,7 +94,7 @@ namespace Kokowolo.Utilities//.Analytics
 
         public static void LogWarning(object message, UnityEngine.Object context = null, Color? color = null)
         {
-            Log(LogType.Warning, defaultLogger, message, context, color);
+            Log(LogType.Warning, UnityLogger, message, context, color);
         }
 
         public static void LogWarning(Logger logger, object message, UnityEngine.Object context = null, Color? color = null)
@@ -94,7 +104,7 @@ namespace Kokowolo.Utilities//.Analytics
 
         public static void LogError(object message, UnityEngine.Object context = null, Color? color = null)
         {
-            Log(LogType.Error, defaultLogger, message, context, color);
+            Log(LogType.Error, UnityLogger, message, context, color);
         }
 
         public static void LogError(Logger logger, object message, UnityEngine.Object context = null, Color? color = null)
@@ -104,7 +114,7 @@ namespace Kokowolo.Utilities//.Analytics
 
         public static void LogException(object message, UnityEngine.Object context = null, Color? color = null)
         {
-            Log(LogType.Exception, defaultLogger, message, context, color);
+            Log(LogType.Exception, UnityLogger, message, context, color);
             if (ThrowWhenLoggingException)
             {
                 throw new Exception(StringBuilder.ToString());
@@ -113,7 +123,7 @@ namespace Kokowolo.Utilities//.Analytics
 
         public static void LogException(Exception exception, UnityEngine.Object context = null, Color? color = null)
         {
-            Log(LogType.Exception, defaultLogger, exception, context, color);
+            Log(LogType.Exception, UnityLogger, exception, context, color);
             if (ThrowWhenLoggingException)
             {
                 throw exception;
@@ -141,17 +151,37 @@ namespace Kokowolo.Utilities//.Analytics
         // [System.Diagnostics.Conditional("UNITY_EDITOR")]
         private static void Log(LogType logType, Logger logger, object message, UnityEngine.Object context, Color? color)
         {
-            stackTraceDepth = 4;
+            TryInitializeUnityLogger();
+
+            // set stack trace depth
+            stackTraceDepth = 4; // NOTE: use uncommented line if we use nested function calls in the future
             // stackTraceDepth = stackTraceDepth > 3 ? stackTraceDepth : 3;
 
+            // build message
             StringBuilder.Clear();
             BuildMessageWithClassTag(message);
             BuildMessageWithColorTag(color);
 
-            Debug.unityLogger.logHandler = logger;
+            // swap out original logger for given logger, log message, then replace original logger
+            SetLogger(logger);
             logger.Log(logType, StringBuilder.ToString(), context: context);
-            Debug.unityLogger.logHandler = defaultLogger;
+            SetLogger(UnityLogger);
+
+            // reset stack trace depth
             stackTraceDepth = 0;
+        }
+
+        private static void TryInitializeUnityLogger()
+        {
+            if (unityLogger == null)
+            {
+                unityLogger = new Logger(Debug.unityLogger.logHandler);
+            }
+        }
+
+        private static void SetLogger(Logger logger)
+        {
+            Debug.unityLogger.logHandler = logger.logHandler;
         }
 
         private static void BuildMessageWithClassTag(object message)
