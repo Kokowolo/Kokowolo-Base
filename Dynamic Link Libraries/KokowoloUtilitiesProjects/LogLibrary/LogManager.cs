@@ -27,12 +27,15 @@ namespace Kokowolo.Utilities//.Analytics
         /************************************************************/
         #region Fields
 
+        // data
         internal const string LogManagerProfileString = "LogManager Profile";
 
-        private static bool hasAttemptedLoad;
-        private static int stackTraceDepth;
-
+        // cached references
         private static Logger unityLogger;
+        private static LogManagerProfile profile;
+
+        // variables
+        private static int stackTraceDepth;
 
         #endregion
         /************************************************************/
@@ -48,17 +51,12 @@ namespace Kokowolo.Utilities//.Analytics
             }
         }
 
-        private static LogManagerProfile _Profile;
         public static LogManagerProfile Profile
         {
             get
             {
-                if (!_Profile && !hasAttemptedLoad)
-                {
-                    hasAttemptedLoad = true;
-                    _Profile = Resources.Load<LogManagerProfile>(LogManagerProfileString);
-                }
-                return _Profile;
+                TryInitialize();
+                return profile;
             }
         }
 
@@ -66,7 +64,7 @@ namespace Kokowolo.Utilities//.Analytics
         {
             get
             {
-                TryInitializeUnityLogger();
+                TryInitialize();
                 return unityLogger;
             }
         }
@@ -151,7 +149,7 @@ namespace Kokowolo.Utilities//.Analytics
         // [System.Diagnostics.Conditional("UNITY_EDITOR")]
         private static void Log(LogType logType, Logger logger, object message, UnityEngine.Object context, Color? color)
         {
-            TryInitializeUnityLogger();
+            TryInitialize();
 
             // set stack trace depth
             stackTraceDepth = 4; // NOTE: use uncommented line if we use nested function calls in the future
@@ -171,12 +169,16 @@ namespace Kokowolo.Utilities//.Analytics
             stackTraceDepth = 0;
         }
 
-        private static void TryInitializeUnityLogger()
+        private static void TryInitialize()
         {
-            if (unityLogger == null)
-            {
-                unityLogger = new Logger(Debug.unityLogger.logHandler);
-            }
+            if (unityLogger != null) return;
+
+            // initialize Unity Logger
+            unityLogger = new Logger(Debug.unityLogger.logHandler);
+
+            // initialize LogManager Profile
+            profile = Resources.Load<LogManagerProfile>(LogManagerProfileString);
+            if (profile) profile.OnLoad();
         }
 
         private static void SetLogger(Logger logger)

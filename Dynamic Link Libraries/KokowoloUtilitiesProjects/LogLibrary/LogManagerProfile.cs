@@ -34,6 +34,11 @@ namespace Kokowolo.Utilities//.Analytics
         #endregion
         /************************************************************/
         #region Functions
+
+        public virtual void OnLoad() 
+        {
+            LogManager.Log("LogManager Profile Loaded", color: Color.green);
+        }
         
         #endregion
         /************************************************************/
