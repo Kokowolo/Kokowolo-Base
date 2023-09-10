@@ -51,10 +51,10 @@ public class TestGridPathfinding : IPathfinding
 
     public bool IsValidMoveBetweenNodes(Node start, Node end)
     {  
-        int height = 2;
         bool isValid = true;
         // Check for Blocking Obstacle
-        isValid &= !GridManager.Map.HasBlockingObstacleTowardsCell(start.GetCell(), end.GetCell(), height);
+        GridDirection dir = GridCoordinates.GetDirectionToCoordinates(start.GetCell().Coordinates, end.GetCell().Coordinates);
+        isValid &= !start.GetCell().HasBlockingObstacle(dir, fromRelativeHeight: 0, toRelativeHeight: 2);
 
         // TODO: Check for Enough Vertical Space
         // GridManager.Map.GetCellsBelowCoordinates
