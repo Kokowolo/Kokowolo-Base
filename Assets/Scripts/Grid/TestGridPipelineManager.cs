@@ -55,19 +55,23 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     // Input
     private bool Input_SwitchMode => Input.GetKeyDown(KeyCode.Tab);
 
+    // General
+    private bool Input_Undo => Input.GetMouseButtonDown(1);
     private bool Input_Click => Input.GetMouseButtonDown(0);
+
+    private bool Input_RotateClockwise => Input.GetKeyDown(KeyCode.E);
+    private bool Input_RotateCounterClockwise => Input.GetKeyDown(KeyCode.Q);
+
+    // Mode 1
     private bool Input_Click_Hold => Input.GetMouseButton(0);
     private bool Input_Click_Release => Input.GetMouseButtonUp(0);
 
-    private bool Input_Undo => Input.GetMouseButtonDown(1);
-
+    // Mode 2
+    private bool Input_CreateMap => Input.GetKeyDown(KeyCode.Alpha0);
     private bool Input_ToggleGridManagerActive => Input.GetKeyDown(KeyCode.Space);
 
     private bool Input_RangeIncrease => Input.GetKeyDown(KeyCode.RightArrow);
     private bool Input_RangeDecrease => Input.GetKeyDown(KeyCode.LeftArrow);
-
-    private bool Input_RotateClockwise => Input.GetKeyDown(KeyCode.E);
-    private bool Input_RotateCounterClockwise => Input.GetKeyDown(KeyCode.Q);
 
     private bool Input_RoutePath => Input.GetKeyDown(KeyCode.R);
     private bool Input_RouteDijkstra => Input.GetKeyDown(KeyCode.F);
@@ -77,7 +81,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     /************************************************************/
     #region Functions
 
-    private void Awake() 
+    private void Start()
     {
         gridTransform.Init(transform);
         RefreshGridTransform();
@@ -88,8 +92,6 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     private void Update()
     {
         HandleInput();
-
-        // GridManager.Visual.Show(cells);
     }
 
     private void HandleInput()
@@ -167,6 +169,10 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
         if (Input_ToggleGridManagerActive)
         {
             GridManager.SetActive(!GridManager.Instance.gameObject.activeSelf);
+        }
+        if (Input_CreateMap)
+        {
+            GridManager.Map.Create();
         }
         if (Input_RangeDecrease)
         {

@@ -51,15 +51,18 @@ public class TestGridPathfinding : IPathfinding
 
     public bool IsValidMoveBetweenNodes(Node start, Node end)
     {  
-        bool isValid = true;
-        // Check for Blocking Obstacle
-        GridDirection dir = GridCoordinates.GetDirectionToCoordinates(start.GetCell().Coordinates, end.GetCell().Coordinates);
-        isValid &= !start.GetCell().HasBlockingObstacle(dir, fromRelativeHeight: 0, toRelativeHeight: 2);
+        int height = 2;
+        GridCell startCell = start.Instance as GridCell;
+        GridCell endCell = end.Instance as GridCell;
+        GridDirection direction = GridCoordinates.GetDirectionToCoordinates(startCell.Coordinates, endCell.Coordinates);
 
-        // TODO: Check for Enough Vertical Space
+        // HACK: [LUTRO-238] Dynamically Sized Units - clean this up
+        bool lowerOption = !startCell.HasBlockingObstacle(direction, fromRelativeHeight: 0, height);
+        bool upperOption = !startCell.HasBlockingObstacle(direction, fromRelativeHeight: 1, height + 1);
+        return lowerOption || upperOption; 
+        
+        // TODO: Check for Enough Vertical Space ?
         // GridManager.Map.GetCellsBelowCoordinates
-
-        return isValid;
     }
 
     public int GetDistanceBetweenNodes(Node start, Node end)
