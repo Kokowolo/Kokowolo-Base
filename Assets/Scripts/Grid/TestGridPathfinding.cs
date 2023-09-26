@@ -44,12 +44,12 @@ public class TestGridPathfinding : IPathfinding
     /************************************************************/
     #region Functions
 
-    public List<Node> GetNeighborsFromNode(Node node)
+    List<Node> IPathfinding.GetNeighborsFromNode(Node node)
     {
         return node.GetNeighbors();
     }
 
-    public bool IsValidMoveBetweenNodes(Node start, Node end)
+    bool IPathfinding.IsValidMoveBetweenNodes(Node start, Node end)
     {  
         int height = 2;
         GridCell startCell = start.Instance as GridCell;
@@ -65,17 +65,17 @@ public class TestGridPathfinding : IPathfinding
         // GridManager.Map.GetCellsBelowCoordinates
     }
 
-    public int GetDistanceBetweenNodes(Node start, Node end)
+    int IPathfinding.GetHeuristicCostBetweenNodes(Node start, Node end)
     {
-        return start.GetCell().Coordinates.GetDistanceTo(end.GetCell().Coordinates, ignoreFallDistance: false);
+        return start.GetCell().Coordinates.GetDistanceTo(end.GetCell().Coordinates, ignoreLevelDistance: true, ignoreFallDistance: false);
     }
 
-    public int GetMoveCostBetweenNodes(Node start, Node end)
+    int IPathfinding.GetMoveCostBetweenNodes(Node start, Node end)
     {
         return 1;
     }
 
-    public bool IsPathOutsideMovementRange(NodePath path)
+    bool IPathfinding.IsPathOutsideMovementRange(NodePath path)
     {
         return false;
     }
