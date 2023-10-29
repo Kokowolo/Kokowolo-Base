@@ -17,10 +17,23 @@ using Kokowolo.Utilities;
 using Kokowolo.Grid;
 using System;
 
-public class TestRunner : MonoBehaviour//, IPoolable<TestRunner>
+public class TestRunner : MonoBehaviour
 {
     /************************************************************/
     #region Fields
+
+    [Header("Cached References")]
+    [SerializeField] List<GameObject> cubes;
+
+    [Header("Settings")]
+    [SerializeField] float min = - 1;
+    [SerializeField] float max = 1;
+    [SerializeField] float speed = 1;
+    
+    List<int> selectedCubeIndexes = new List<int>();
+    List<ScheduledEvent> scheduledEvents = new List<ScheduledEvent>();
+
+    float target;
 
     #endregion
     /************************************************************/
@@ -30,23 +43,89 @@ public class TestRunner : MonoBehaviour//, IPoolable<TestRunner>
     /************************************************************/
     #region Functions
 
-    private void Awake() 
+    private void Awake()
     {
-        List<int> ints = new List<int>();
-        Debug.Log(ints.Capacity);
-        ints.Add(0);
-        ints.Add(1);
-        ints.Add(2);
-        ints.Add(3);
-        ints.Add(4);
-        Debug.Log(ints.Capacity);
-        Debug.Log(ints[1]);
-        ints.Clear();
-        Debug.Log(ints.Capacity);
-        Debug.Log(ints[1]);
-        ints.Capacity = 3;
-        Debug.Log(ints.Capacity);
-        Debug.Log(ints[1]);
+        for (int i = 0; i < cubes.Count; i++)
+        {
+            scheduledEvents.Add(null);
+        }
+    }
+
+    private IEnumerator Long()
+    {
+        int count=0;
+        while (count < 5)
+        {
+            LogManager.Log("Long");
+            count++;
+            yield return new WaitForSeconds(1);
+        }
+    }
+
+    private IEnumerator Short()
+    {
+        LogManager.Log("Short");
+        yield return new WaitForSeconds(1);
+        LogManager.Log("Short end");
+    }
+
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            SelectCubes();
+            MoveSelectedCubes();
+        }
+    }
+
+    private void SelectCubes()
+    {
+        selectedCubeIndexes.Clear();
+        if (Input.GetKey(KeyCode.Alpha1))
+        {
+            selectedCubeIndexes.Add(0);
+        }
+        if (Input.GetKey(KeyCode.Alpha2))
+        {
+            selectedCubeIndexes.Add(1);
+        }
+        if (Input.GetKey(KeyCode.Alpha3))
+        {
+            selectedCubeIndexes.Add(2);
+        }
+    }
+
+    private void MoveSelectedCubes()
+    {
+        // Clear Previous Coroutines
+        for (int i = 0; i < scheduledEvents.Count; i++)
+        {
+            ScheduledEventManager.StopEvent(scheduledEvents[i]);
+        }
+
+        // Tween Cubes
+        for (int i = 0; i < selectedCubeIndexes.Count; i++)
+        {
+            int index = selectedCubeIndexes[i];
+            // float target = cubes[index].transform.position.x > (max + min) / 2 ? min : max;
+            Action<float> setMethod = (float x) =>
+            {
+                Vector3 pos = cubes[index].transform.position;
+                pos.x = x;
+                cubes[index].transform.position = pos;
+            };
+            float a = cubes[index].transform.position.x > Mathf.Abs(max + min) / 2 ? max : min;
+            float b = cubes[index].transform.position.x > Mathf.Abs(max + min) / 2 ? min : max;
+            if (index == 2)
+            {
+                scheduledEvents[index] = Tween.Loglerp(cubes[index].transform.position.x, a, b, speed, setMethod);
+            }
+            else
+            {
+                scheduledEvents[index] = Tween.Lerp(cubes[index].transform.position.x, a, b, speed, setMethod);
+            }
+            
+        }
     }
 
     #endregion
