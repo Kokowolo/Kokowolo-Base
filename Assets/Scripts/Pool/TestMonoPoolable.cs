@@ -50,7 +50,7 @@ public class TestMonoPoolable : MonoBehaviour, IPoolable<TestMonoPoolable>
     public void OnGetPoolable(params object[] args)
     {
         gameObject.SetActive(true);
-        gameObject.transform.SetParent(FindObjectOfType<TestRunner>().transform);
+        gameObject.transform.SetParent(FindObjectOfType<TestRunner1>().transform);
     }
 
     #endregion

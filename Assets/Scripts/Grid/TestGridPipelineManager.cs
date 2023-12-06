@@ -155,10 +155,16 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
         }
         if (Input_RotateClockwise || Input_RotateCounterClockwise)
         {
+            // params
+            GridDirection startDir = GridDirection.NW;
+            // get data
             List<GridCoordinates> coordinatesList = new List<GridCoordinates>();
-            GridDirection direction = Input_RotateClockwise ? GridDirection.NW.Next() : GridDirection.NW.Previous();
             foreach (var cell in visualCells) coordinatesList.Add(cell.Coordinates);
-            GridPositioning.Rotate(ref coordinatesList, GridDirection.NW, direction);
+            // variables
+            GridDirection direction = Input_RotateClockwise ? startDir.Next() : startDir.Previous();
+            // call function
+            GridPositioning.Rotate(ref coordinatesList, startDir, direction);
+            // update visual
             for (int i = 0; i < visualCells.Count; i++) visualCells[i] = GridManager.Map.GetCell(coordinatesList[i]);
             visualJobs[visualJobs.Count - 1].Update(coordinatesList);
         }
