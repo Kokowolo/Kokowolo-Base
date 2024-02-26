@@ -83,7 +83,7 @@ namespace Kokowolo.Grid
         {
             // HACK: move this to Grid package
             GridCoordinates coordinates = GridCoordinates.Invalid;
-            if (CursorManager.HasValidHitInfo)
+            if (CursorWorldManager.HasValidHitInfo)
             {
                 // if (CursorManager.HitInfo.transform.gameObject.IsInLayerMask(LayerManager.UnitLayerMask))
                 // {
@@ -91,7 +91,8 @@ namespace Kokowolo.Grid
                 // }
                 // else
                 // {
-                    coordinates = new GridCoordinates(CursorManager.HitInfo.point);
+                    Vector3 localPosition = GridManager.Instance.transform.InverseTransformPoint(CursorWorldManager.HitInfo.point);
+                    coordinates = new GridCoordinates(localPosition);
                 // }
             }   
             return coordinates;

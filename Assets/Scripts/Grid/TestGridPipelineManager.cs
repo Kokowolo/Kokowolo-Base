@@ -20,6 +20,17 @@ using Kokowolo.Utilities;
 public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
 {
     /************************************************************/
+    #region Enum
+
+    private enum InputMode
+    {
+        Mode1,
+        Mode2,
+        Mode3
+    }
+    
+    #endregion
+    /************************************************************/
     #region Fields
 
     [Header("Cached References")]
@@ -46,7 +57,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
 
     GridMapVisualJob gridTransformVisualJob;
 
-    private bool mode = true;
+    private InputMode mode = InputMode.Mode1;
  
     #endregion
     /************************************************************/
@@ -86,11 +97,20 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
         gridTransform.Init(transform);
         RefreshGridTransform();
 
-        modeText.text = $"mode {1}";
+        modeText.text = $"{mode}";
     }
 
     private void Update()
     {
+        // SHOW CENTER POINT
+        {
+            Vector3 point1 = GridManager.Map.GetLocalCenterPosition();
+            Vector3 point2 = GridManager.Map.GetLocalCenterPosition(useOnlyExplorableCells: false);
+            point1 = GridManager.Instance.transform.TransformPoint(point1);
+            point2 = GridManager.Instance.transform.TransformPoint(point2);
+            Debug.DrawLine(point1, point1 + GridManager.Instance.transform.rotation * new Vector3(0, 100, 0), Color.blue);
+            Debug.DrawLine(point2, point2 + GridManager.Instance.transform.rotation * new Vector3(0, 100, 0), Color.green);
+        }
         HandleInput();
     }
 
@@ -99,22 +119,31 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
         // Switch Mode
         if (Input_SwitchMode) 
         {
-            mode = !mode;
-            int modeInt = mode ? 1 : 2;
-            modeText.text = $"mode {modeInt}";
+            mode = (InputMode) MathKoko.WrapClamp((int) mode + 1, 0, EnumUtils.GetCount<InputMode>());
+            modeText.text = $"{mode}";
         }
 
-        if (mode)
+        switch (mode)
         {
-            HandleMode1Input();
-        }
-        else
-        {
-            HandleMode2Input();
+            case InputMode.Mode1:
+            {
+                HandleInputMode1();
+                break;
+            }
+            case InputMode.Mode2:
+            {
+                HandleInputMode2();
+                break;
+            }
+            case InputMode.Mode3:
+            {
+                CustomFunction();
+                break;
+            }
         }
     }
 
-    private void HandleMode1Input()
+    private void HandleInputMode1()
     {
         if (Input_Click)
         {
@@ -170,7 +199,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
         }
     }
 
-    private void HandleMode2Input()
+    private void HandleInputMode2()
     {
         if (Input_ToggleGridManagerActive)
         {
@@ -351,6 +380,11 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
         var job = GridManager.Visual.CreateVisualJob(GridMapVisualJob.JobType.Minis, cells, color: MathKoko.GetRandomColor());
         yield return new WaitForSeconds(1f);
         GridManager.Visual.RemoveVisualJob(job);
+    }
+
+    private void CustomFunction()
+    {
+        // temp test code
     }
 
     #region Interface Functions
