@@ -118,11 +118,11 @@ public class TestRunner1 : MonoBehaviour
             float b = cubes[index].transform.position.x > Mathf.Abs(max + min) / 2 ? min : max;
             if (index == 2)
             {
-                scheduledEvents[index] = Tween.Loglerp(cubes[index].transform.position.x, a, b, speed, setMethod);
+                // scheduledEvents[index] = Tween.Loglerp(cubes[index].transform.position.x, a, b, speed, setMethod);
             }
             else
             {
-                scheduledEvents[index] = Tween.Lerp(cubes[index].transform.position.x, a, b, speed, setMethod);
+                // scheduledEvents[index] = Tween.Lerp(cubes[index].transform.position.x, a, b, speed, setMethod);
             }
             
         }

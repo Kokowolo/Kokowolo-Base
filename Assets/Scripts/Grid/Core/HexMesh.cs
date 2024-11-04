@@ -17,7 +17,7 @@ using Kokowolo.Grid;
 using Kokowolo.ProceduralMesh;
 using Kokowolo.Utilities;
 
-public class HexMesh : ProceduralMesh
+public class HexMesh : CustomMesh
 {
     /************************************************************/
     #region Fields
@@ -28,11 +28,20 @@ public class HexMesh : ProceduralMesh
 
     #endregion
     /************************************************************/
+    #region Properties
+
+    protected override string MeshName
+    {
+        get => nameof(HexMesh);
+    }
+
+    #endregion
+    /************************************************************/
     #region Functions
 
     private void Awake()
     {
-        Refresh();
+        Reload();
     }
 
     private void Update() {
@@ -43,11 +52,11 @@ public class HexMesh : ProceduralMesh
         }
         if (Input.GetKeyDown(KeyCode.Alpha0))
         {
-            Refresh();
+            Reload();
         }
     }
 
-    public void Refresh()
+    public void Reload()
     {
         Clear();
         List<GridCell> cells = new List<GridCell>();
