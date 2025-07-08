@@ -24,39 +24,35 @@ namespace Kokowolo.Utilities//.Analytics
 {
     public static class LogManager
     {
-        /************************************************************/
+        /*██████████████████████████████████████████████████████████*/
         #region Fields
 
-        // data
-        internal const string LogManagerProfileString = "LogManager Profile";
-
         // cached references
-        private static Logger unityLogger;
-        private static LogManagerProfile profile;
+        static Logger unityLogger;
 
         // variables
-        private static int stackTraceDepth;
+        static int stackTraceDepth;
 
         #endregion
-        /************************************************************/
+        /*██████████████████████████████████████████████████████████*/
         #region Properties
 
-        private static StringBuilder _StringBuilder;
-        private static StringBuilder StringBuilder 
-        {
-            get
-            {
-                _StringBuilder ??= new StringBuilder(capacity: 256);
-                return _StringBuilder;
-            }
-        }
+        static StringBuilder _StringBuilder;
+        static StringBuilder StringBuilder => _StringBuilder ??= new StringBuilder(capacity: 256);
 
+        static LogManagerProfile _Profile;
         public static LogManagerProfile Profile
         {
             get
             {
                 TryInitialize();
-                return profile;
+                return _Profile;
+            }
+            set
+            {
+                _Profile = value;
+                if (_Profile) _Profile.OnLoad();
+                else LogWarning("could not propertly initialize");
             }
         }
 
@@ -70,45 +66,39 @@ namespace Kokowolo.Utilities//.Analytics
         }
 
         // default properties without an initialized LogManagerProfile
-        private static bool LogMessageWithClassTag => !Profile || Profile.LogMessageWithClassTag;
-        private static bool ThrowWhenLoggingException => Profile && Profile.ThrowWhenLoggingException;
+        static bool LogMessageWithClassTag => !Profile || Profile.LogMessageWithClassTag;
+        static bool ThrowWhenLoggingException => Profile && Profile.ThrowWhenLoggingException;
 
         // other properties
-        private static bool LogMessageWithColorTag => Application.isEditor;
+        static bool LogMessageWithColorTag => Application.isEditor;
 
         #endregion
-        /************************************************************/
+        /*██████████████████████████████████████████████████████████*/
         #region Functions
 
-        public static void Log(object message, UnityEngine.Object context = null, Color? color = null)
-        {
-            Log(LogType.Log, UnityLogger, message, context, color);
-        }
+        public static void Log(object message, UnityEngine.Object context = null, Color? color = null) => Log(LogType.Log, UnityLogger, message, context, color);
+        public static void Log(object message, UnityEngine.Object context) => Log(LogType.Log, UnityLogger, message, context, null);
+        public static void Log(object message, Color? color) => Log(LogType.Log, UnityLogger, message, null, color);
 
-        public static void Log(Logger logger, object message, UnityEngine.Object context = null, Color? color = null)
-        {
-            Log(LogType.Log, logger, message, context, color);
-        }
+        public static void Log(Logger logger, object message, UnityEngine.Object context = null, Color? color = null) => Log(LogType.Log, logger, message, context, color);
+        public static void Log(Logger logger, object message, UnityEngine.Object context) => Log(LogType.Log, logger, message, context, null);
+        public static void Log(Logger logger, object message, Color? color) => Log(LogType.Log, logger, message, null, color);
 
-        public static void LogWarning(object message, UnityEngine.Object context = null, Color? color = null)
-        {
-            Log(LogType.Warning, UnityLogger, message, context, color);
-        }
+        public static void LogWarning(object message, UnityEngine.Object context = null, Color? color = null) => Log(LogType.Warning, UnityLogger, message, context, color);
+        public static void LogWarning(object message, UnityEngine.Object context) => Log(LogType.Warning, UnityLogger, message, context, null);
+        public static void LogWarning(object message, Color? color) => Log(LogType.Warning, UnityLogger, message, null, color);
 
-        public static void LogWarning(Logger logger, object message, UnityEngine.Object context = null, Color? color = null)
-        {
-            Log(LogType.Warning, logger, message, context, color);
-        }
+        public static void LogWarning(Logger logger, object message, UnityEngine.Object context = null, Color? color = null) => Log(LogType.Warning, logger, message, context, color);
+        public static void LogWarning(Logger logger, object message, UnityEngine.Object context) => Log(LogType.Warning, logger, message, context, null);
+        public static void LogWarning(Logger logger, object message, Color? color) => Log(LogType.Warning, logger, message, null, color);
 
-        public static void LogError(object message, UnityEngine.Object context = null, Color? color = null)
-        {
-            Log(LogType.Error, UnityLogger, message, context, color);
-        }
+        public static void LogError(object message, UnityEngine.Object context = null, Color? color = null) => Log(LogType.Error, UnityLogger, message, context, color);
+        public static void LogError(object message, UnityEngine.Object context) => Log(LogType.Error, UnityLogger, message, context, null);
+        public static void LogError(object message, Color? color) => Log(LogType.Error, UnityLogger, message, null, color);
 
-        public static void LogError(Logger logger, object message, UnityEngine.Object context = null, Color? color = null)
-        {
-            Log(LogType.Error, logger, message, context, color);
-        }
+        public static void LogError(Logger logger, object message, UnityEngine.Object context = null, Color? color = null) => Log(LogType.Error, logger, message, context, color);
+        public static void LogError(Logger logger, object message, UnityEngine.Object context) => Log(LogType.Error, logger, message, context, null);
+        public static void LogError(Logger logger, object message, Color? color) => Log(LogType.Error, logger, message, null, color);
 
         public static void LogException(object message, UnityEngine.Object context = null, Color? color = null)
         {
@@ -147,7 +137,7 @@ namespace Kokowolo.Utilities//.Analytics
         }
 
         // [System.Diagnostics.Conditional("UNITY_EDITOR")]
-        private static void Log(LogType logType, Logger logger, object message, UnityEngine.Object context, Color? color)
+        static void Log(LogType logType, Logger logger, object message, UnityEngine.Object context, Color? color)
         {
             TryInitialize();
 
@@ -169,7 +159,7 @@ namespace Kokowolo.Utilities//.Analytics
             stackTraceDepth = 0;
         }
 
-        private static void TryInitialize()
+        static void TryInitialize()
         {
             if (unityLogger != null) return;
 
@@ -177,16 +167,15 @@ namespace Kokowolo.Utilities//.Analytics
             unityLogger = new Logger(Debug.unityLogger.logHandler);
 
             // initialize LogManager Profile
-            profile = Resources.Load<LogManagerProfile>(LogManagerProfileString);
-            if (profile) profile.OnLoad();
+            Profile = Resources.Load<LogManagerProfile>(path: "LogManagerProfile");
         }
 
-        private static void SetLogger(Logger logger)
+        static void SetLogger(Logger logger)
         {
             Debug.unityLogger.logHandler = logger.logHandler;
         }
 
-        private static void BuildMessageWithClassTag(object message)
+        static void BuildMessageWithClassTag(object message)
         {
             if (!LogMessageWithClassTag)
             {
@@ -208,19 +197,19 @@ namespace Kokowolo.Utilities//.Analytics
             }
         }
 
-        private static void BuildMessageWithColorTag(Color? color = null)
+        static void BuildMessageWithColorTag(Color? color = null)
         {
             if (!LogMessageWithColorTag || color == null) return;
             StringBuilder.Insert(0, $"<color=#{ColorUtility.ToHtmlStringRGB((Color) color)}>");
             StringBuilder.Append("</color>");
         }
 
-        private static string GetCallingClassName(int stackTraceDepth)
+        static string GetCallingClassName(int stackTraceDepth)
         {   
             return new System.Diagnostics.StackTrace().GetFrame(stackTraceDepth).GetMethod().ReflectedType.Name;
         }
 
         #endregion
-        /************************************************************/
+        /*██████████████████████████████████████████████████████████*/
     }
 }
