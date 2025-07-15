@@ -64,3 +64,5 @@ mono_crash.*
 # Project Specific Files
 /[Aa]ssets/[Aa]ssetStore/*
 /[Aa]ssets/[Aa]ssetStore.meta
+/[Aa]ssets/Plugins/*
+/[Aa]ssets/Plugins.meta
