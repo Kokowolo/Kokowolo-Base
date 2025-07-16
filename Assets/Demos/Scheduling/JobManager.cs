@@ -19,6 +19,7 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
         /*██████████████████████████████████████████████████████████*/
         #region Fields
 
+        List<Job> pendingJobs;
         List<Job> scheduledJobs;
         List<Job> activeJobs;
         Job runningScheduledJob;
@@ -27,7 +28,7 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
         /*██████████████████████████████████████████████████████████*/
         #region Properties
 
-        public bool IsFree => scheduledJobs.Count == 0 && !IsRunning;
+        public bool IsFree => pendingJobs.Count == 0 && scheduledJobs.Count == 0 && !IsRunning;
         bool IsRunning => activeJobs.Count != 0;
 
         #endregion
@@ -36,20 +37,51 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
 
         protected override void Singleton_OnDestroy()
         {
+            ListPool.Release(ref pendingJobs);
             ListPool.Release(ref scheduledJobs);
             ListPool.Release(ref activeJobs);
         }
 
         protected override void Singleton_Awake()
         {
+            pendingJobs = ListPool.Get<Job>();
             scheduledJobs = ListPool.Get<Job>();
             activeJobs = ListPool.Get<Job>();
+        }
+
+        void LateUpdate()
+        {
+            // Validate pending jobs
+            for (int i = pendingJobs.Count - 1; i >= 0; i--)
+            {
+                Job job = pendingJobs[i];
+                if (job.IsPending)
+                {
+                    job.OnDispose -= Handle_PendingJob_OnDispose;
+                    StartJob(job);
+                }
+                pendingJobs.RemoveAt(i);
+            }
             enabled = false;
         }
+
+        internal static void PendJob(Job job)
+        {
+            job.OnDispose += Instance.Handle_PendingJob_OnDispose;
+            Instance.pendingJobs.Add(job);
+            Instance.enabled = true;
+        }
         
-        public static Job StartJob(Action action, float time) => StartJob(Job.Get(action, time));
-        public static Job StartJob(IEnumerator routine) => StartJob(Job.Get(routine));
-        static Job StartJob(Job job)
+        void Handle_PendingJob_OnDispose(object sender, EventArgs e)
+        {
+            Job job = sender as Job;
+            job.OnDispose -= Instance.Handle_PendingJob_OnDispose;
+            pendingJobs.Remove(job);
+        }
+        
+        // public static Job StartJob(Action action, float time) => StartJob(Job.Get(action, time));
+        // public static Job StartJob(IEnumerator routine) => StartJob(Job.Get(routine));
+        internal static Job StartJob(Job job)
         {
             job.OnDispose += Instance.Handle_Job_OnDispose;
             Instance.activeJobs.Add(job);
@@ -57,9 +89,9 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             return job;
         }
 
-        public static Job ScheduleJob(Action action, float time) => ScheduleJob(Job.Get(action, time));
-        public static Job ScheduleJob(IEnumerator routine) => ScheduleJob(Job.Get(routine));
-        static Job ScheduleJob(Job job)
+        // public static Job ScheduleJob(Action action, float time) => ScheduleJob(Job.Get(action, time));
+        // public static Job ScheduleJob(IEnumerator routine) => ScheduleJob(Job.Get(routine));
+        internal static Job ScheduleJob(Job job)
         {
             job.OnDispose += Instance.Handle_Job_OnDispose;
             if (Instance.runningScheduledJob == null)
@@ -102,6 +134,18 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             scheduledJobs.RemoveAt(0);
         }
 
+        #endregion
+        /*██████████████████████████████████████████████████████████*/
+        #region Editor
+#if UNITY_EDITOR
+
+        void OnValidate()
+        {
+            if (Application.isPlaying) return;
+            enabled = false;
+        }
+
+#endif
         #endregion
         /*██████████████████████████████████████████████████████████*/
     }

@@ -41,9 +41,9 @@ public class ScheduledEventManagerFunctionality
     {
         float time = 0.1f;
         int value = 0;
-        JobManager.StartJob(Function1, time);
-        JobManager.StartJob(Function1, time);
-        JobManager.StartJob(Function1, time);
+        Job.Get(Function1, time);
+        Job.Get(Function1, time);
+        Job.Get(Function1, time);
         yield return new WaitForJobManager();
 
         Debug.Assert(value == 3);
@@ -57,9 +57,9 @@ public class ScheduledEventManagerFunctionality
     {
         float time = 0.1f;
         int value = 0;
-        JobManager.ScheduleJob(Function1, time);
-        JobManager.ScheduleJob(Function1, time);
-        JobManager.ScheduleJob(Function1, time);
+        Job.Schedule(Function1, time);
+        Job.Schedule(Function1, time);
+        Job.Schedule(Function1, time);
         yield return new WaitForJobManager();
 
         Debug.Assert(value == 3);
@@ -73,9 +73,9 @@ public class ScheduledEventManagerFunctionality
     {
         float time = 0.1f;
         int value = 0;
-        JobManager.StartJob(Function1, time);
-        JobManager.StartJob(Function2, time * 3);
-        JobManager.StartJob(Function3, time);
+        Job.Get(Function1, time);
+        Job.Get(Function2, time * 3);
+        Job.Get(Function3, time);
         yield return new WaitForJobManager();
 
         Debug.Assert(value == 16);
@@ -91,9 +91,9 @@ public class ScheduledEventManagerFunctionality
     {
         float time = 0.1f;
         int value = 0;
-        JobManager.ScheduleJob(Function1, time);
-        JobManager.ScheduleJob(Function2, time * 3);
-        JobManager.ScheduleJob(Function1, time);
+        Job.Schedule(Function1, time);
+        Job.Schedule(Function2, time * 3);
+        Job.Schedule(Function1, time);
         yield return new WaitForJobManager();
 
         Debug.Assert(value == 12);
@@ -108,12 +108,12 @@ public class ScheduledEventManagerFunctionality
     {
         float time = 0.2f;
         int value = 0;
-        JobManager.ScheduleJob(Function2, time);
-        JobManager.ScheduleJob(Function2, time);
-        JobManager.ScheduleJob(Function2, time);
-        JobManager.StartJob(Function1, time * 1.5f);
-        JobManager.StartJob(Function1, time * 1.5f);
-        JobManager.StartJob(Function1, time * 1.5f);
+        Job.Schedule(Function2, time);
+        Job.Schedule(Function2, time);
+        Job.Schedule(Function2, time);
+        Job.Get(Function1, time * 1.5f);
+        Job.Get(Function1, time * 1.5f);
+        Job.Get(Function1, time * 1.5f);
         yield return new WaitForJobManager();
 
         Debug.Assert(value == 48);
@@ -128,8 +128,8 @@ public class ScheduledEventManagerFunctionality
     {
         float time = 0.1f;
         int value = 0;
-        Job p = JobManager.ScheduleJob(Function1, time * 100);
-        JobManager.ScheduleJob(Function1, time);
+        Job p = Job.Schedule(Function1, time * 100);
+        Job.Schedule(Function1, time);
         p.Dispose();
         yield return new WaitForJobManager();
 
@@ -144,9 +144,9 @@ public class ScheduledEventManagerFunctionality
     {
         float time = 0.1f;
         int value = 0;
-        Job p = JobManager.ScheduleJob(Function1, time * 100);
-        JobManager.ScheduleJob(Function1, time);
-        JobManager.ScheduleJob(Function1, time);
+        Job p = Job.Schedule(Function1, time * 100);
+        Job.Schedule(Function1, time);
+        Job.Schedule(Function1, time);
         p.Dispose();
         yield return null;
         yield return new WaitForJobManager();
@@ -162,9 +162,9 @@ public class ScheduledEventManagerFunctionality
     {
         float time = 0.1f;
         int value = 0;
-        Job p = JobManager.StartJob(Function1, time * 100);
-        JobManager.StartJob(Function1, time);
-        JobManager.StartJob(Function1, time);
+        Job p = Job.Get(Function1, time * 100);
+        Job.Get(Function1, time);
+        Job.Get(Function1, time);
         p.Dispose();
         yield return new WaitForJobManager();
 
@@ -179,9 +179,9 @@ public class ScheduledEventManagerFunctionality
     {
         float time = 0.1f;
         int value = 0;
-        JobManager.ScheduleJob(Function1, time);
-        JobManager.ScheduleJob(Function1, time);
-        Job p = JobManager.ScheduleJob(Function2, time);
+        Job.Schedule(Function1, time);
+        Job.Schedule(Function1, time);
+        Job p = Job.Schedule(Function2, time);
         p.Dispose();
         yield return new WaitForJobManager();
 
@@ -197,12 +197,12 @@ public class ScheduledEventManagerFunctionality
     {
         float time =0.1f;
         int value = 0;
-        JobManager.StartJob(Function1, time);
-        JobManager.StartJob(Function1, time);
-        JobManager.StartJob(Function1, time);
-        JobManager.StartJob(Function1, time);
-        JobManager.StartJob(Function1, time);
-        Job p = JobManager.StartJob(Function2, time);
+        Job.Get(Function1, time);
+        Job.Get(Function1, time);
+        Job.Get(Function1, time);
+        Job.Get(Function1, time);
+        Job.Get(Function1, time);
+        Job p = Job.Get(Function2, time);
         p.Dispose();
         yield return new WaitForJobManager();
 
@@ -218,10 +218,10 @@ public class ScheduledEventManagerFunctionality
     {
         float time = 0.1f;
         int value = 0;
-        JobManager.ScheduleJob(Function1, time);
-        JobManager.ScheduleJob(Function2, time);
-        JobManager.ScheduleJob(Function1, time);
-        Job job = JobManager.ScheduleJob(Function2, time);
+        Job.Schedule(Function1, time);
+        Job.Schedule(Function2, time);
+        Job.Schedule(Function1, time);
+        Job job = Job.Schedule(Function2, time);
         job.Dispose();
         yield return new WaitForJobManager();
 

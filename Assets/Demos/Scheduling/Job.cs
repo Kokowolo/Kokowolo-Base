@@ -19,8 +19,36 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
         #region Events
 
         internal event EventHandler OnDispose;
-        public event EventHandler OnComplete;
-        public event EventHandler OnStart;
+
+        event EventHandler OnCompleteInternal;
+        public event EventHandler OnComplete
+        {
+            add
+            {
+                IsPending = false;
+                OnCompleteInternal += value;
+            }
+            remove
+            {
+                // ValidateInvocationList = true;
+                OnCompleteInternal -= value;
+            }
+        }
+
+        event EventHandler OnStartInternal;
+        public event EventHandler OnStart
+        {
+            add
+            {
+                IsPending = false;
+                OnStartInternal += value;
+            }
+            remove
+            {
+                // ValidateInvocationList = true;
+                OnStartInternal -= value;
+            }
+        }
 
         #endregion
         /*██████████████████████████████████████████████████████████*/
@@ -29,7 +57,7 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
         static int id = 0;
         internal int instanceId;
 
-        IEnumerator routine;
+        protected IEnumerator routine;
         Coroutine coroutine;
 
         #endregion
@@ -39,11 +67,14 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
         public bool IsDisposed => disposed;
         public bool IsRunning => coroutine != null;
 
+        internal bool IsPending { get; set; } = true;
+        // internal bool ValidateInvocationList { get; private set; } = false;
+
         #endregion
         /*██████████████████████████████████████████████████████████*/
         #region Functions
 
-        bool disposed;
+        protected bool disposed;
         ~Job() => Dispose(complete: false);
         void IDisposable.Dispose() => Dispose(complete: false);
 
@@ -55,7 +86,7 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             // Complete
             if (complete)
             {
-                OnComplete?.Invoke(this, EventArgs.Empty);
+                OnCompleteInternal?.Invoke(this, EventArgs.Empty);
             }
             
             // Release resources
@@ -66,30 +97,50 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             }
             routine = null;
             OnDispose?.Invoke(this, EventArgs.Empty);
+            OnDispose = null;
+            OnStartInternal = null;
+            OnCompleteInternal = null;
         }
 
-        static internal Job Get(Action function, float time)
+        static IEnumerator Routine(Action function, float time)
         {
-            return Get(_Routine(function, time));
-            static IEnumerator _Routine(Action function, float time)
+            if (time == 0)
             {
-                if (time == 0)
-                {
-                    yield return null;
-                }
-                else if (time > 0)
-                {
-                    yield return new WaitForSeconds(time);
-                }
-                function.Invoke();
+                yield return null;
             }
+            else if (time > 0)
+            {
+                yield return new WaitForSeconds(time);
+            }
+            function.Invoke();
         }
 
-        static internal Job Get(IEnumerator routine)
+        public static Job Get(Action function, float time)
         {
-            Job job = new Job();
-            job.routine = routine;
+            return Get(Routine(function, time));
+        }
+
+        public static Job Get(IEnumerator routine)
+        {
+            Job job = new Job(routine);
+            JobManager.PendJob(job);
             return job;
+        }
+
+        public static Job Schedule(Action function, float time)
+        {
+            return JobManager.ScheduleJob(new Job(Routine(function, time)));
+        }
+
+        public static Job Schedule(IEnumerator routine)
+        {
+            return JobManager.ScheduleJob(new Job(routine));
+        }
+
+        internal Job (Action function, float time) : this(Routine(function, time)) {}
+        internal Job(IEnumerator routine) : this() 
+        {
+            this.routine = routine;
         }
 
         protected Job()
@@ -112,10 +163,15 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
 
         IEnumerator RunRoutine()
         {
-            OnStart?.Invoke(this, EventArgs.Empty);
+            OnStartInternal?.Invoke(this, EventArgs.Empty);
             yield return routine;
             Dispose(complete: true);
         }
+
+        // public IEnumerator GetEnumerator()
+        // {
+        //     yield return routine;
+        // }
 
         #endregion
         /*██████████████████████████████████████████████████████████*/

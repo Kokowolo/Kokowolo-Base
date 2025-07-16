@@ -49,10 +49,9 @@ public class SchedulingDemo
         // Demo main
         float time = 0.1f;
         int value = 0;
-        // Job p1 = Job.Create(Function1, time);
-        Job p1 = JobManager.StartJob(Function1, time);
-        Job p2 = JobManager.StartJob(Function1, time);
-        Job p3 = JobManager.StartJob(Function1, time);
+        Job p1 = Job.Get(Function1, time);
+        Job p2 = Job.Get(Function1, time);
+        Job p3 = Job.Get(Function1, time);
 
         // Declare local function
         void Function1()
@@ -85,9 +84,9 @@ public class SchedulingDemo
         float time = 0.1f;
         int value = 0;
         int increment = 1;
-        Job p1 = JobManager.StartJob(Function1(increment++));
-        Job p2 = JobManager.StartJob(Function1(increment++));
-        Job p3 = JobManager.StartJob(Function1(increment++));
+        Job p1 = Job.Get(Function1(increment++));
+        Job p2 = Job.Get(Function1(increment++));
+        Job p3 = Job.Get(Function1(increment++));
 
         // Declare local function
         IEnumerator Function1(int i)
@@ -120,9 +119,9 @@ public class SchedulingDemo
         // Demo main
         float time = 0.1f;
         int value = 0;
-        Job p1 = JobManager.ScheduleJob(Function1, time);
-        Job p2 = JobManager.ScheduleJob(Function1, time);
-        Job p3 = JobManager.ScheduleJob(Function1, time);
+        Job p1 = Job.Schedule(Function1, time);
+        Job p2 = Job.Schedule(Function1, time);
+        Job p3 = Job.Schedule(Function1, time);
 
         // Declare local function
         void Function1()
@@ -157,9 +156,9 @@ public class SchedulingDemo
         float time = 0.1f;
         int value = 0;
         int increment = 1;
-        Job p1 = JobManager.ScheduleJob(Function1(increment++));
-        Job p2 = JobManager.ScheduleJob(Function1(increment++));
-        Job p3 = JobManager.ScheduleJob(Function1(increment++));
+        Job p1 = Job.Schedule(Function1(increment++));
+        Job p2 = Job.Schedule(Function1(increment++));
+        Job p3 = Job.Schedule(Function1(increment++));
 
         // Declare local function
         IEnumerator Function1(int i)
@@ -188,39 +187,136 @@ public class SchedulingDemo
         Debug.Assert(!r1.IsAlive && !r2.IsAlive && !r3.IsAlive);
     }
 
-    // [UnityTest]
-    // public IEnumerator _03_0()
-    // {
-    //     // Demo main
-    //     float time = 0.1f;
-    //     int value = 0;
+    [UnityTest]
+    public IEnumerator _03_0()
+    {
+        // Demo main
+        float time = 0.1f;
+        int value = 0;
+        JobSequence s1 = JobSequence.Get();
+        Job p2 = Job.Get(Function1, time); s1.Append(p2);
+        s1.Append(Function1, time);
+        Job p3 = Job.Get(Function1, time); s1.Append(p3);
 
-    //     JobSequence s1 = new JobSequence();
-    //     s1.Append(Function1, time);
-    //     s1.Append(Function1, time);
-    //     s1.Append(Function1, time);
+        // Declare local function
+        void Function1()
+        {
+            value += 1;
+        }
 
-    //     // Declare local function
-    //     void Function1()
-    //     {
-    //         value += 1;
-    //     }
+        // Prepare GC check
+        WeakReference r1 = new WeakReference(s1);
+        WeakReference r2 = new WeakReference(p2);
+        WeakReference r3 = new WeakReference(p3);
+        Debug.Assert(r1.IsAlive && r2.IsAlive && r3.IsAlive);
 
-    //     // Prepare GC check
-    //     WeakReference r1 = new WeakReference(s1);
-    //     Debug.Assert(r1.IsAlive);
+        // Demo check
+        Debug.Assert(value == 0);
+        yield return new WaitForJob(p2);
+        Debug.Assert(value == 1);
+        yield return new WaitForJobManager();
+        Debug.Assert(value == 3);
+        yield return new WaitForJob(p3);
+        Debug.Assert(value == 3);
+        yield return new WaitForJob(s1);
+        Debug.Assert(value == 3);
+        Debug.Assert(s1.IsDisposed && p2.IsDisposed && p3.IsDisposed);
 
-    //     // Demo check
-    //     Debug.Assert(value == 0);
-    //     yield return new WaitForJobManager();
-    //     Debug.Assert(value == 3);
-    //     Debug.Assert(s1.IsDisposed);
+        // Evaluate GC
+        s1 = null;
+        p2 = null;
+        p3 = null;
+        yield return null;
+        GC.Collect();
+        Debug.Assert(!r1.IsAlive && !r2.IsAlive && !r3.IsAlive);
+    }
 
-    //     // Evaluate GC
-    //     s1 = null;
-    //     GC.Collect();
-    //     Debug.Assert(!r1.IsAlive);
-    // }
+    [UnityTest]
+    public IEnumerator _03_1()
+    {
+        // Demo main
+        float time = 0.1f;
+        int value = 0;
+        JobSequence s1 = JobSequence.Get();
+        Job p2 = Job.Get(Function1(1, time * 3)); s1.Append(p2);
+        Job p3 = Job.Get(Function1(3, time)); s1.Append(p3);
+        s1.Append(Function1(2, time));
+        
+        // Declare local function
+        IEnumerator Function1(int i, float time)
+        {
+            yield return new WaitForSeconds(time);
+            value += i;
+        }
+
+        // Prepare GC check
+        WeakReference r1 = new WeakReference(s1);
+        WeakReference r2 = new WeakReference(p2);
+        WeakReference r3 = new WeakReference(p3);
+        Debug.Assert(r1.IsAlive && r2.IsAlive && r3.IsAlive);
+
+        // Demo check
+        Debug.Assert(value == 0);
+        yield return new WaitForJob(p2);
+        Debug.Assert(value == 1);
+        yield return new WaitForJob(p3);
+        Debug.Assert(value == 4);
+        yield return new WaitForJobManager();
+        Debug.Assert(value == 6);
+        yield return new WaitForJob(s1);
+        Debug.Assert(value == 6);
+        Debug.Assert(s1.IsDisposed && p2.IsDisposed && p3.IsDisposed);
+
+        // Evaluate GC
+        s1 = null;
+        p2 = null;
+        p3 = null;
+        yield return null;
+        GC.Collect();
+        Debug.Assert(!r1.IsAlive && !r2.IsAlive && !r3.IsAlive);
+    }
+
+    [UnityTest]
+    public IEnumerator _03_2()
+    {
+        // Demo main
+        float time = 0.1f;
+        int value = 0;
+        JobSequence s1 = JobSequence.Get();
+        s1.Append(Job.Get(Function1, time * 3));
+        Job p2 = Job.Get(Function1, -1); s1.Append(p2);
+        s1.Append(Job.Get(Function1, -1));
+        Job p3 = Job.Get(Function1, time);
+
+        // Declare local function
+        void Function1()
+        {
+            value += 1;
+        }
+
+        // Prepare GC check
+        WeakReference r1 = new WeakReference(s1);
+        WeakReference r2 = new WeakReference(p2);
+        WeakReference r3 = new WeakReference(p3);
+        Debug.Assert(r1.IsAlive && r2.IsAlive && r3.IsAlive);
+
+        // Demo check
+        Debug.Assert(value == 0);
+        yield return new WaitForJob(p3);
+        Debug.Assert(value == 1);
+        yield return new WaitForJob(s1);
+        Debug.Assert(value == 4);
+        Debug.Assert(JobManager.Instance.IsFree);
+        Debug.Assert(s1.IsDisposed && p2.IsDisposed && p3.IsDisposed);
+
+        // Evaluate GC
+        s1 = null;
+        p2 = null;
+        p3 = null;
+        yield return null;
+        GC.Collect();
+        Debug.Assert(!r1.IsAlive && !r2.IsAlive && !r3.IsAlive);
+    }
 
     #endregion
     /*——————————————————————————————————————————————————————————*/
