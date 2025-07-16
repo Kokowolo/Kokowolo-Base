@@ -47,7 +47,7 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
         ~Job() => Dispose(complete: false);
         void IDisposable.Dispose() => Dispose(complete: false);
 
-        public virtual void Dispose(bool complete)
+        public virtual void Dispose(bool complete = false)
         {
             if (disposed) return;
             disposed = true;

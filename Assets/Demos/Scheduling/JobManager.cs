@@ -14,7 +14,6 @@ using Kokowolo.Utilities;
 
 namespace Kokowolo.Base.Demo.SchedulingDemo
 {
-    [DefaultExecutionOrder(-100)]
     public class JobManager : MonoBehaviourSingleton<JobManager>
     {
         /*██████████████████████████████████████████████████████████*/
