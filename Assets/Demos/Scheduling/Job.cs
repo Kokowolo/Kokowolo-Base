@@ -29,8 +29,6 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
         static int id = 0;
         internal int instanceId;
 
-        bool isActive = true;
-
         IEnumerator routine;
         Coroutine coroutine;
 
@@ -38,8 +36,8 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
         /*██████████████████████████████████████████████████████████*/
         #region Properties
 
-        public bool IsActive => isActive && !disposed;
-        bool IsRunning => coroutine != null;
+        public bool IsDisposed => disposed;
+        public bool IsRunning => coroutine != null;
 
         #endregion
         /*██████████████████████████████████████████████████████████*/
@@ -55,11 +53,10 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             disposed = true;
 
             // Complete
-            if (complete && isActive)
+            if (complete)
             {
                 OnComplete?.Invoke(this, EventArgs.Empty);
             }
-            isActive = false;
             
             // Release resources
             if (coroutine != null) 
@@ -83,6 +80,10 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             if (disposed) 
             {
                 throw new Exception($"[{nameof(Job)}] {nameof(Start)} called after {nameof(Dispose)}");
+            }
+            if (coroutine != null) 
+            {
+                throw new Exception($"[{nameof(Job)}] {nameof(Start)} called twice");
             }
             coroutine = JobManager.Instance.StartCoroutine(RunRoutine());
         }
