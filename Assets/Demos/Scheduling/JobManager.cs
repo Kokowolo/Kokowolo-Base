@@ -45,49 +45,30 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             scheduledJobs = ListPool.Get<Job>();
             activeJobs = ListPool.Get<Job>();
         }
-
+        
         public static Job StartJob(Action action, float time) => StartJob(new Job(action, time));
         public static Job StartJob(IEnumerator routine) => StartJob(new Job(routine));
         static Job StartJob(Job job)
         {
             Instance.activeJobs.Add(job);
-            job.OnComplete += Instance.Handle_Job_OnComplete;
-            Instance.StartCoroutine(job.Run());
+            job.OnDispose += Instance.Handle_Job_OnDispose;
+            job.Start();
             return job;
         }
 
-        public static Job ScheduleJob(Action action, float time) => ScheduleJob(new Job(action, time));
-        public static Job ScheduleJob(IEnumerator routine) => ScheduleJob(new Job(routine));
-        static Job ScheduleJob(Job job)
-        {
-            Instance.scheduledJobs.Add(job);
-            return job;
-        }
-
-        // public static JobSequence StartJobSequence(IEnumerator routine)
+        // public static Job ScheduleJob(Action action, float time) => ScheduleJob(new Job(action, time));
+        // public static Job ScheduleJob(IEnumerator routine) => ScheduleJob(new Job(routine));
+        // static Job ScheduleJob(Job job)
         // {
-        //     JobSequence job = new JobSequence(routine);
-        //     Instance.StartCoroutine(job.Run());
+        //     Instance.scheduledJobs.Add(job);
         //     return job;
         // }
 
-        // void Run()
-        // {
-        //     if (IsRunning) return;
-        //     StartCoroutine(RunRoutine());
-        // }
-
-        // IEnumerator RunRoutine()
-        // {
-            
-        // }
-
-        void Handle_Job_OnComplete(object sender, EventArgs e)
+        void Handle_Job_OnDispose(object sender, EventArgs e)
         {
             Job job = sender as Job;
-            job.OnComplete -= Instance.Handle_Job_OnComplete;
+            job.OnDispose -= Instance.Handle_Job_OnDispose;
             activeJobs.Remove(job);
-            job.Dispose();
         }
 
         #endregion

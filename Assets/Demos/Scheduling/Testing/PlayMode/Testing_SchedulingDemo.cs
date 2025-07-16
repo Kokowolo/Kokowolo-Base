@@ -1,3 +1,12 @@
+/* 
+ * Author(s): Kokowolo, Will Lacey
+ * Date Created: July 15, 2025
+ * 
+ * Additional Comments:
+ *      File Line Length: ~140
+ */
+ 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
@@ -41,40 +50,72 @@ public class Testing_SchedulingDemo
     [UnityTest]
     public IEnumerator Testing_0_SchedulingManager_00()
     {
-        
-        // Debug.Assert(Object.FindFirstObjectByType<JobManager>());
-        yield return null;
+        yield return null; // Wait for instance to set
         Debug.Assert(JobManager.Instance);
     }
 
     [UnityTest]
-    public IEnumerator Testing_0_SchedulingManager_01()
+    public IEnumerator Testing_0_SchedulingManager_01_0()
     {
+        // Demo main
         float time = 0.1f;
         int value = 0;
-        void Function1() => value += 1;
         Job p1 = JobManager.StartJob(Function1, time);
-        Job p2 = JobManager.StartJob(Function1, time);
-        Job p3 = JobManager.StartJob(Function1, time);
+        JobManager.StartJob(Function1, time);
+        JobManager.StartJob(Function1, time);
+
+        // Declare local function
+        void Function1()
+        {
+            value += 1;
+        }
+
+        // Prepare GC check
+        WeakReference p1Reference = new WeakReference(p1);
+        Debug.Assert(p1Reference.IsAlive);
+
+        // Demo check
         yield return new WaitForJobManager();
         Debug.Assert(value == 3);
+        Debug.Assert(!p1.IsActive);
+
+        // Evaluate GC
+        p1 = null;
+        GC.Collect();
+        Debug.Assert(!p1Reference.IsAlive);
     }
 
-    // [UnityTest]
-    // public IEnumerator Testing_0_SchedulingManager_01()
-    // {
-    //     float time = 0.1f;
-    //     int value = 0;
-    //     ScheduledEventManager.ScheduleEvent(Function1, time);
-    //     ScheduledEventManager.ScheduleEvent(Function1, time);
-    //     ScheduledEventManager.ScheduleEvent(Function1, time);
-    //     yield return ScheduledEventManager.WaitWhileIsRunning();
+    [UnityTest]
+    public IEnumerator Testing_0_SchedulingManager_01_1()
+    {
+        // Demo main
+        float time = 0.1f;
+        int value = 0;
+        Job p1 = JobManager.StartJob(Function1());
+        JobManager.StartJob(Function1());
+        JobManager.StartJob(Function1());
 
-    //     Debug.Assert(value == 3);
+        // Declare local function
+        IEnumerator Function1()
+        {
+            yield return new WaitForSeconds(time);
+            value += 1;
+        }
 
-    //     // helper functions
-    //     void Function1() => value += 1;
-    // }
+        // Prepare GC check
+        WeakReference p1Reference = new WeakReference(p1);
+        Debug.Assert(p1Reference.IsAlive);
+
+        // Demo check
+        yield return new WaitForJobManager();
+        Debug.Assert(value == 3);
+        Debug.Assert(!p1.IsActive);
+
+        // Evaluate GC
+        p1 = null;
+        GC.Collect();
+        Debug.Assert(!p1Reference.IsAlive);
+    }
 
     // [UnityTest]
     // public IEnumerator Testing_0_SchedulingManager_02()

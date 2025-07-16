@@ -18,8 +18,9 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
         /*██████████████████████████████████████████████████████████*/
         #region Events
 
-        public event EventHandler OnStart;
+        internal event EventHandler OnDispose;
         public event EventHandler OnComplete;
+        public event EventHandler OnStart;
 
         #endregion
         /*██████████████████████████████████████████████████████████*/
@@ -29,26 +30,45 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
         internal int instanceId;
 
         bool isActive = true;
-        internal IEnumerator routine;
+
+        IEnumerator routine;
+        Coroutine coroutine;
 
         #endregion
         /*██████████████████████████████████████████████████████████*/
         #region Properties
 
-        // public IEnumerator Routine => routine;
-        public bool IsActive => isActive;
+        public bool IsActive => isActive && !disposed;
+        bool IsRunning => coroutine != null;
 
         #endregion
         /*██████████████████████████████████████████████████████████*/
         #region Functions
 
         bool disposed;
-        ~Job() => Dispose();
-        public virtual void Dispose()
+        ~Job() => Dispose(complete: false);
+        void IDisposable.Dispose() => Dispose(complete: false);
+
+        public virtual void Dispose(bool complete)
         {
             if (disposed) return;
             disposed = true;
+
+            // Complete
+            if (complete && isActive)
+            {
+                OnComplete?.Invoke(this, EventArgs.Empty);
+            }
+            isActive = false;
+            
+            // Release resources
+            if (coroutine != null) 
+            {
+                JobManager.Instance.StopCoroutine(coroutine);
+                coroutine = null;
+            }
             routine = null;
+            OnDispose?.Invoke(this, EventArgs.Empty);
         }
 
         internal Job(Action function, float time) : this(InvokeFunctionAfterTime(function, time)) {}
@@ -58,27 +78,20 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             this.routine = routine;
         }
 
-        internal void Complete()
-        {
-            isActive = false;
-            OnComplete?.Invoke(this, EventArgs.Empty);
-        }
-
         internal void Start()
         {
-            OnStart?.Invoke(this, EventArgs.Empty);
+            if (disposed) 
+            {
+                throw new Exception($"[{nameof(Job)}] {nameof(Start)} called after {nameof(Dispose)}");
+            }
+            coroutine = JobManager.Instance.StartCoroutine(RunRoutine());
         }
 
-        internal IEnumerator Run()
+        IEnumerator RunRoutine()
         {
             OnStart?.Invoke(this, EventArgs.Empty);
             yield return routine;
-            OnComplete?.Invoke(this, EventArgs.Empty);
-        }
-    
-        public void Kill()
-        {
-            isActive = false;
+            Dispose(complete: true);
         }
 
         static IEnumerator InvokeFunctionAfterTime(Action function, float time)
