@@ -18,9 +18,7 @@
 //         /*██████████████████████████████████████████████████████████*/
 //         #region Fields
 
-//         #endregion
-//         /*██████████████████████████████████████████████████████████*/
-//         #region Fields
+
 
 //         #endregion
 //         /*██████████████████████████████████████████████████████████*/
@@ -30,18 +28,30 @@
 //         /*██████████████████████████████████████████████████████████*/
 //         #region Functions
 
-//         // bool disposed;
-//         // ~Schedule() => Dispose();
-//         // public override void Dispose()
-//         // {
-//         //     if (disposed) return;
-//         //     disposed = true;
-//         // }
+//         protected JobSequence() : base()
+//         {
+//             // 
+//         }
 
-//         // public void Append()
-//         // {
+//         public void Prepend()
+//         {
+//             if (IsRunning)
+//             {
+//                 Utilities.LogManager.Log($"{nameof(JobSequence)} is already running"); 
+//                 return;
+//             }
+//         }
 
-//         // }
+//         public void Append(Action action, float time)
+//         public void Append(IEnumerator routine)
+//         void Append()
+//         {
+//             if (IsRunning)
+//             {
+//                 Utilities.LogManager.Log($"{nameof(JobSequence)} is already running"); 
+//                 return;
+//             }
+//         }
 
 //         #endregion
 //         /*██████████████████████████████████████████████████████████*/

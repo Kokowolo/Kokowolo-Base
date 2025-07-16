@@ -44,10 +44,11 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
         {
             scheduledJobs = ListPool.Get<Job>();
             activeJobs = ListPool.Get<Job>();
+            enabled = false;
         }
         
-        public static Job StartJob(Action action, float time) => StartJob(new Job(action, time));
-        public static Job StartJob(IEnumerator routine) => StartJob(new Job(routine));
+        public static Job StartJob(Action action, float time) => StartJob(Job.Get(action, time));
+        public static Job StartJob(IEnumerator routine) => StartJob(Job.Get(routine));
         static Job StartJob(Job job)
         {
             job.OnDispose += Instance.Handle_Job_OnDispose;
@@ -56,8 +57,8 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             return job;
         }
 
-        public static Job ScheduleJob(Action action, float time) => ScheduleJob(new Job(action, time));
-        public static Job ScheduleJob(IEnumerator routine) => ScheduleJob(new Job(routine));
+        public static Job ScheduleJob(Action action, float time) => ScheduleJob(Job.Get(action, time));
+        public static Job ScheduleJob(IEnumerator routine) => ScheduleJob(Job.Get(routine));
         static Job ScheduleJob(Job job)
         {
             job.OnDispose += Instance.Handle_Job_OnDispose;
@@ -73,6 +74,11 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             }
             return job;
         }
+
+        // public static JobSequence JobSequence()
+        // {
+        //     return new JobSequence();
+        // }
 
         internal void Handle_Job_OnDispose(object sender, EventArgs e)
         {

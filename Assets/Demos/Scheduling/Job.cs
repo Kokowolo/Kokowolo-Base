@@ -68,11 +68,33 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             OnDispose?.Invoke(this, EventArgs.Empty);
         }
 
-        internal Job(Action function, float time) : this(InvokeFunctionAfterTime(function, time)) {}
-        internal Job(IEnumerator routine)
+        static internal Job Get(Action function, float time)
+        {
+            return Get(_Routine(function, time));
+            static IEnumerator _Routine(Action function, float time)
+            {
+                if (time == 0)
+                {
+                    yield return null;
+                }
+                else if (time > 0)
+                {
+                    yield return new WaitForSeconds(time);
+                }
+                function.Invoke();
+            }
+        }
+
+        static internal Job Get(IEnumerator routine)
+        {
+            Job job = new Job();
+            job.routine = routine;
+            return job;
+        }
+
+        protected Job()
         {
             instanceId = id++;
-            this.routine = routine;
         }
 
         internal void Start()
@@ -93,19 +115,6 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             OnStart?.Invoke(this, EventArgs.Empty);
             yield return routine;
             Dispose(complete: true);
-        }
-
-        static IEnumerator InvokeFunctionAfterTime(Action function, float time)
-        {
-            if (time == 0)
-            {
-                yield return null;
-            }
-            else if (time > 0)
-            {
-                yield return new WaitForSeconds(time);
-            }
-            function.Invoke();
         }
 
         #endregion
