@@ -12,16 +12,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using Kokowolo.Utilities;
 
-namespace Kokowolo.Base.Demo.SchedulingDemo
+namespace Kokowolo.Base.Demos.SchedulingDemo
 {
     public class JobManager : MonoBehaviourSingleton<JobManager>
     {
         /*██████████████████████████████████████████████████████████*/
         #region Fields
 
-        List<Job> pendingJobs;
-        List<Job> scheduledJobs;
-        List<Job> activeJobs;
+        internal List<Job> pendingJobs;
+        internal List<Job> scheduledJobs;
+        internal List<Job> activeJobs;
         Job runningScheduledJob;
         
         #endregion
@@ -68,6 +68,7 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
         internal static void PendJob(Job job)
         {
             job.OnDispose += Instance.Handle_PendingJob_OnDispose;
+            job.IsPending = true;
             Instance.pendingJobs.Add(job);
             Instance.enabled = true;
         }
@@ -78,25 +79,19 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             pendingJobs.Remove(job);
         }
         
-        // public static Job StartJob(Action action, float time) => StartJob(Job.Get(action, time));
-        // public static Job StartJob(IEnumerator routine) => StartJob(Job.Get(routine));
         internal static Job StartJob(Job job)
         {
             job.OnDispose += Instance.Handle_Job_OnDispose;
-            Instance.activeJobs.Add(job);
             job.Start();
             return job;
         }
 
-        // public static Job ScheduleJob(Action action, float time) => ScheduleJob(Job.Get(action, time));
-        // public static Job ScheduleJob(IEnumerator routine) => ScheduleJob(Job.Get(routine));
         internal static Job ScheduleJob(Job job)
         {
             job.OnDispose += Instance.Handle_Job_OnDispose;
             if (Instance.runningScheduledJob == null)
             {
                 Instance.runningScheduledJob = job;
-                Instance.activeJobs.Add(job);
                 job.Start();
             }
             else
@@ -105,11 +100,6 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             }
             return job;
         }
-
-        // public static JobSequence JobSequence()
-        // {
-        //     return new JobSequence();
-        // }
 
         internal void Handle_Job_OnDispose(Job job)
         {
@@ -127,7 +117,6 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             // Handle next scheduled job
             if (scheduledJobs.Count == 0) return;
             runningScheduledJob = scheduledJobs[0];
-            activeJobs.Add(scheduledJobs[0]);
             scheduledJobs[0].Start();
             scheduledJobs.RemoveAt(0);
         }

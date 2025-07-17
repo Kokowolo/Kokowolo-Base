@@ -11,7 +11,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
-namespace Kokowolo.Base.Demo.SchedulingDemo
+namespace Kokowolo.Base.Demos.SchedulingDemo
 {
     public class JobSequence : Job
     {
@@ -32,9 +32,10 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             Utilities.ListPool.Release(ref jobs);
         }
 
-        JobSequence() : base()
+        JobSequence() : base(null) // NOTE: pass null because we can't pass Routine()
         {
             jobs = Utilities.ListPool.Get<Job>();
+            routine = Routine();
         }
 
         public static JobSequence Get()
@@ -44,6 +45,28 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             JobManager.PendJob(jobSequence);
             return jobSequence;
         }
+
+        public static JobSequence Schedule()
+        {
+            JobSequence jobSequence = new JobSequence();
+            // jobSequence.routine = jobSequence.Routine();
+            // JobManager.PendJob(jobSequence);
+            return jobSequence;
+
+            // job.OnDispose += Instance.Handle_Job_OnDispose;
+            // if (Instance.runningScheduledJob == null)
+            // {
+            //     Instance.runningScheduledJob = job;
+            //     Instance.activeJobs.Add(job);
+            //     job.Start();
+            // }
+            // else
+            // {
+            //     Instance.scheduledJobs.Add(job);
+            // }
+            // return job;
+        }
+        
 
         IEnumerator Routine()
         {

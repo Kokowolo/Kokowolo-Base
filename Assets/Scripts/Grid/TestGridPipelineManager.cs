@@ -119,7 +119,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
         // Switch Mode
         if (Input_SwitchMode) 
         {
-            mode = (InputMode) MathKoko.WrapClamp((int) mode + 1, 0, EnumUtils.GetCount<InputMode>());
+            mode = (InputMode) KokoMath.WrapClamp((int) mode + 1, 0, EnumUtils.GetCount<InputMode>());
             modeText.text = $"{mode}";
         }
 
@@ -157,7 +157,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
             visualJob = GridManager.Visual.CreateVisualJob(
                 GridMapVisualJob.JobType.Group, 
                 visualCells, 
-                color: MathKoko.GetRandomColor() * 0.8f
+                color: KokoRandom.Color() * 0.8f
             );
         }
         else if (Input_Click_Hold)
@@ -377,7 +377,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
             cells.Add(node.GetCell());
         }
 
-        var job = GridManager.Visual.CreateVisualJob(GridMapVisualJob.JobType.Minis, cells, color: MathKoko.GetRandomColor());
+        var job = GridManager.Visual.CreateVisualJob(GridMapVisualJob.JobType.Minis, cells, color: KokoRandom.Color());
         yield return new WaitForSeconds(1f);
         GridManager.Visual.RemoveVisualJob(job);
     }

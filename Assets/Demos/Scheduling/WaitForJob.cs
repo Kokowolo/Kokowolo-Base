@@ -11,7 +11,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Kokowolo.Base.Demo.SchedulingDemo
+namespace Kokowolo.Base.Demos.SchedulingDemo
 {
     public class WaitForJob : CustomYieldInstruction, IDisposable
     {

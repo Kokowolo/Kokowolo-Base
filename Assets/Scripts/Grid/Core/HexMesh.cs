@@ -75,12 +75,12 @@ public class HexMesh : CustomMesh
     {
         foreach (GridCell cell in cells)
         {
-            Vector3 v0 = MathKoko.Perturb(GridMetrics.Corners[0] + cell.SurfacePosition, noiseStrength, useY: false);
-            Vector3 v1 = MathKoko.Perturb(GridMetrics.Corners[1] + cell.SurfacePosition, noiseStrength, useY: false);
-            Vector3 v2 = MathKoko.Perturb(GridMetrics.Corners[2] + cell.SurfacePosition, noiseStrength, useY: false);
-            Vector3 v3 = MathKoko.Perturb(GridMetrics.Corners[3] + cell.SurfacePosition, noiseStrength, useY: false);
-            Vector3 v4 = MathKoko.Perturb(GridMetrics.Corners[4] + cell.SurfacePosition, noiseStrength, useY: false);
-            Vector3 v5 = MathKoko.Perturb(GridMetrics.Corners[5] + cell.SurfacePosition, noiseStrength, useY: false);
+            Vector3 v0 = KokoRandom.Perturb(GridMetrics.Corners[0] + cell.SurfacePosition, noiseStrength, useY: false);
+            Vector3 v1 = KokoRandom.Perturb(GridMetrics.Corners[1] + cell.SurfacePosition, noiseStrength, useY: false);
+            Vector3 v2 = KokoRandom.Perturb(GridMetrics.Corners[2] + cell.SurfacePosition, noiseStrength, useY: false);
+            Vector3 v3 = KokoRandom.Perturb(GridMetrics.Corners[3] + cell.SurfacePosition, noiseStrength, useY: false);
+            Vector3 v4 = KokoRandom.Perturb(GridMetrics.Corners[4] + cell.SurfacePosition, noiseStrength, useY: false);
+            Vector3 v5 = KokoRandom.Perturb(GridMetrics.Corners[5] + cell.SurfacePosition, noiseStrength, useY: false);
 
             AddTriangle(v0, v1, v5, subdivisions);
             AddQuad(v1, v2, v4, v5, subdivisions);

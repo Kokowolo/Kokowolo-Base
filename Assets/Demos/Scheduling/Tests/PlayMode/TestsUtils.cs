@@ -13,7 +13,7 @@ using UnityEngine;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 
-using Kokowolo.Base.Demo.SchedulingDemo;
+using Kokowolo.Base.Demos.SchedulingDemo;
 
 public static class TestsUtils
 {

@@ -20,7 +20,7 @@ using Kokowolo.Utilities;
 
 namespace Kokowolo.Grid
 {
-    public class GridCursorController : MonoSingleton<GridCursorController>
+    public class GridCursorController : MonoBehaviourSingleton<GridCursorController>
     {
         /************************************************************/
         #region Events
@@ -62,13 +62,13 @@ namespace Kokowolo.Grid
         /************************************************************/
         #region Functions
 
-        protected override void MonoSingleton_Awake()
+        protected override void Singleton_Awake()
         {
             GridManager.OnGridEnabled += Handle_GridManager_OnGridEnabled;
             GridManager.OnGridDisabled += Handle_GridManager_OnGridDisabled;
         }
 
-        protected override void MonoSingleton_OnDestroy()
+        protected override void Singleton_OnDestroy()
         {
             GridManager.OnGridEnabled -= Handle_GridManager_OnGridEnabled;
             GridManager.OnGridDisabled -= Handle_GridManager_OnGridDisabled;

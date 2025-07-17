@@ -15,7 +15,7 @@ using UnityEngine;
 
 using Kokowolo.Utilities;
 
-namespace Kokowolo.Base.Demo.LayerAttributeDemo
+namespace Kokowolo.Base.Demos.LayerAttributeDemo
 {
     public class TestRunner : MonoBehaviour
     {

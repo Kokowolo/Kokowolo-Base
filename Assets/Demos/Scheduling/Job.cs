@@ -11,7 +11,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Kokowolo.Base.Demo.SchedulingDemo
+namespace Kokowolo.Base.Demos.SchedulingDemo
 {
     public class Job : IDisposable
     {
@@ -20,35 +20,8 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
 
         internal event JobCallback<Job> OnDispose;
 
-        // event EventHandler OnCompleteInternal;
-        internal event JobCallback onComplete;
-        // {
-        //     add
-        //     {
-        //         IsPending = false;
-        //         OnCompleteInternal += value;
-        //     }
-        //     remove
-        //     {
-        //         // ValidateInvocationList = true;
-        //         OnCompleteInternal -= value;
-        //     }
-        // }
-
-        // event EventHandler OnStartInternal;
-        internal event JobCallback onStart;
-        // {
-        //     add
-        //     {
-        //         IsPending = false;
-        //         OnStartInternal += value;
-        //     }
-        //     remove
-        //     {
-        //         // ValidateInvocationList = true;
-        //         OnStartInternal -= value;
-        //     }
-        // }
+        internal event JobCallback OnCompleteInternal;
+        internal event JobCallback OnStartInternal;
 
         #endregion
         /*██████████████████████████████████████████████████████████*/
@@ -67,8 +40,8 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
         public bool IsDisposed => disposed;
         public bool IsRunning => coroutine != null;
 
+        internal bool IsScheduled { get; private set; }
         internal bool IsPending { get; set; } = true;
-        // internal bool ValidateInvocationList { get; private set; } = false;
 
         #endregion
         /*██████████████████████████████████████████████████████████*/
@@ -86,7 +59,7 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             // Complete
             if (complete)
             {
-                onComplete?.Invoke();
+                OnCompleteInternal?.Invoke();
             }
             
             // Release resources
@@ -98,28 +71,18 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             routine = null;
             OnDispose?.Invoke(this);
             OnDispose = null;
-            onStart = null;
-            onComplete = null;
+            OnStartInternal = null;
+            OnCompleteInternal = null;
         }
 
-        static IEnumerator Routine(Action function, float time)
+        internal Job (Action function, float time) : this(Utils.InvokeFunctionAfterTime(function, time)) {}
+        internal Job(IEnumerator routine)
         {
-            if (time == 0)
-            {
-                yield return null;
-            }
-            else if (time > 0)
-            {
-                yield return new WaitForSeconds(time);
-            }
-            function.Invoke();
+            this.routine = routine;
+            instanceId = id++;
         }
 
-        public static Job Get(Action function, float time)
-        {
-            return Get(Routine(function, time));
-        }
-
+        public static Job Get(Action function, float time) => Get(Utils.InvokeFunctionAfterTime(function, time));
         public static Job Get(IEnumerator routine)
         {
             Job job = new Job(routine);
@@ -127,25 +90,11 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             return job;
         }
 
-        public static Job Schedule(Action function, float time)
-        {
-            return JobManager.ScheduleJob(new Job(Routine(function, time)));
-        }
-
+        public static Job Schedule(Action function, float time) => Schedule(Utils.InvokeFunctionAfterTime(function, time));
         public static Job Schedule(IEnumerator routine)
         {
-            return JobManager.ScheduleJob(new Job(routine));
-        }
-
-        internal Job (Action function, float time) : this(Routine(function, time)) {}
-        internal Job(IEnumerator routine) : this() 
-        {
-            this.routine = routine;
-        }
-
-        protected Job()
-        {
-            instanceId = id++;
+            Job job = new Job(routine);
+            return JobManager.ScheduleJob(job);
         }
 
         internal void Start()
@@ -158,25 +107,26 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             {
                 throw new Exception($"[{nameof(Job)}] {nameof(Start)} called twice");
             }
+            JobManager.Instance.activeJobs.Add(this);
             coroutine = JobManager.Instance.StartCoroutine(RunRoutine());
         }
 
         IEnumerator RunRoutine()
         {
-            onStart?.Invoke();
+            OnStartInternal?.Invoke();
             yield return routine;
             Dispose(complete: true);
         }
 
         public Job OnStart(JobCallback callback)
         {
-            onStart += callback;
+            OnStartInternal += callback;
             return this;
         }
 
         public Job OnComplete(JobCallback callback)
         {
-            onComplete += callback;
+            OnCompleteInternal += callback;
             return this;
         }
 

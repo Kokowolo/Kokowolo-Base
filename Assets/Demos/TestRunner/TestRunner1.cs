@@ -10,7 +10,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Kokowolo.Base.Demo.TestRunnerDemo
+namespace Kokowolo.Base.Demos.TestRunnerDemo
 {
     public class TestRunner1 : MonoBehaviour
     {

@@ -10,7 +10,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Kokowolo.Base.Demo.SchedulingDemo
+namespace Kokowolo.Base.Demos.SchedulingDemo
 {
     public delegate void JobCallback<T>(T job) where T : Job;
     public delegate void JobCallback();

@@ -17,7 +17,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 
 // using Kokowolo.Utilities;
-using Kokowolo.Base.Demo.SchedulingDemo;
+using Kokowolo.Base.Demos.SchedulingDemo;
 
 public class ScheduledEventManagerFunctionality
 {

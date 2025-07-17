@@ -50,15 +50,18 @@ public class TestGridPathfinding : IPathfinding
     }
 
     bool IPathfinding.IsValidMoveBetweenNodes(Node start, Node end)
-    {  
-        int height = 2;
-        GridCell startCell = start.Instance as GridCell;
-        GridCell endCell = end.Instance as GridCell;
-        GridDirection direction = GridCoordinates.GetDirectionToCoordinates(startCell.Coordinates, endCell.Coordinates);
+    {
+        return IsValidMoveBetweenNodes((start as Node<GridCell>).Owner, (end as Node<GridCell>).Owner);
+    }
+
+    private bool IsValidMoveBetweenNodes(GridCell start, GridCell end)
+    {
+        const int height = 2;
+        GridDirection direction = GridCoordinates.GetDirectionToCoordinates(start.Coordinates, end.Coordinates);
 
         // HACK: [LUTRO-238] Dynamically Sized Units - clean this up
-        bool lowerOption = !startCell.HasBlockingObstacle(direction, fromRelativeHeight: 0, height);
-        bool upperOption = !startCell.HasBlockingObstacle(direction, fromRelativeHeight: 1, height + 1);
+        bool lowerOption = !start.HasBlockingObstacle(direction, fromRelativeHeight: 0, height);
+        bool upperOption = !start.HasBlockingObstacle(direction, fromRelativeHeight: 1, height + 1);
         return lowerOption || upperOption; 
         
         // TODO: Check for Enough Vertical Space ?

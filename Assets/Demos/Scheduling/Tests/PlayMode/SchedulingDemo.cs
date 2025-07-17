@@ -17,7 +17,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 
 // using Kokowolo.Utilities;
-using Kokowolo.Base.Demo.SchedulingDemo;
+using Kokowolo.Base.Demos.SchedulingDemo;
 
 public class SchedulingDemo
 {
@@ -408,6 +408,17 @@ public class SchedulingDemo
         yield return null;
         GC.Collect();
         Debug.Assert(!r1.IsAlive && !r2.IsAlive && !r3.IsAlive && !r4.IsAlive);
+    }
+
+    [UnityTest]
+    public IEnumerator _06()
+    {
+        yield return null;
+
+        var p1 = Job.Get(null);
+        var p2 = Job.Schedule(null);
+        var s1 = JobSequence.Get();
+        var s2 = JobSequence.Schedule();
     }
 
     #endregion

@@ -10,7 +10,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Kokowolo.Base.Demo.GCTestDemo
+namespace Kokowolo.Base.Demos.GCTestDemo
 {
     public class DemoController : MonoBehaviour
     {
