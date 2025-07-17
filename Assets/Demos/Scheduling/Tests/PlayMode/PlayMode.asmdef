@@ -5,7 +5,8 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "Kokowolo.Utilities",
-        "Demo.SchedulingDemo"
+        "Demo.SchedulingDemo",
+        "DOTween.Modules"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -13,7 +14,8 @@
     "overrideReferences": true,
     "precompiledReferences": [
         "nunit.framework.dll",
-        "Kokowolo.Utilities.Analytics.dll"
+        "Kokowolo.Utilities.Analytics.dll",
+        "DOTween.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

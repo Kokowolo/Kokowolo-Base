@@ -29,7 +29,7 @@ public class ScheduledEventManagerFunctionality
     [OneTimeSetUp] 
     public virtual void OneTimeSetUp()
     {
-        Utils.EnsureTestSceneIsLoaded();
+        TestsUtils.EnsureTestSceneIsLoaded();
     }
 
     #endregion

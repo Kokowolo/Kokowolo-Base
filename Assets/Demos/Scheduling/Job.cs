@@ -18,37 +18,37 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
         /*██████████████████████████████████████████████████████████*/
         #region Events
 
-        internal event EventHandler OnDispose;
+        internal event JobCallback<Job> OnDispose;
 
-        event EventHandler OnCompleteInternal;
-        public event EventHandler OnComplete
-        {
-            add
-            {
-                IsPending = false;
-                OnCompleteInternal += value;
-            }
-            remove
-            {
-                // ValidateInvocationList = true;
-                OnCompleteInternal -= value;
-            }
-        }
+        // event EventHandler OnCompleteInternal;
+        internal event JobCallback onComplete;
+        // {
+        //     add
+        //     {
+        //         IsPending = false;
+        //         OnCompleteInternal += value;
+        //     }
+        //     remove
+        //     {
+        //         // ValidateInvocationList = true;
+        //         OnCompleteInternal -= value;
+        //     }
+        // }
 
-        event EventHandler OnStartInternal;
-        public event EventHandler OnStart
-        {
-            add
-            {
-                IsPending = false;
-                OnStartInternal += value;
-            }
-            remove
-            {
-                // ValidateInvocationList = true;
-                OnStartInternal -= value;
-            }
-        }
+        // event EventHandler OnStartInternal;
+        internal event JobCallback onStart;
+        // {
+        //     add
+        //     {
+        //         IsPending = false;
+        //         OnStartInternal += value;
+        //     }
+        //     remove
+        //     {
+        //         // ValidateInvocationList = true;
+        //         OnStartInternal -= value;
+        //     }
+        // }
 
         #endregion
         /*██████████████████████████████████████████████████████████*/
@@ -86,7 +86,7 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             // Complete
             if (complete)
             {
-                OnCompleteInternal?.Invoke(this, EventArgs.Empty);
+                onComplete?.Invoke();
             }
             
             // Release resources
@@ -96,10 +96,10 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
                 coroutine = null;
             }
             routine = null;
-            OnDispose?.Invoke(this, EventArgs.Empty);
+            OnDispose?.Invoke(this);
             OnDispose = null;
-            OnStartInternal = null;
-            OnCompleteInternal = null;
+            onStart = null;
+            onComplete = null;
         }
 
         static IEnumerator Routine(Action function, float time)
@@ -163,15 +163,22 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
 
         IEnumerator RunRoutine()
         {
-            OnStartInternal?.Invoke(this, EventArgs.Empty);
+            onStart?.Invoke();
             yield return routine;
             Dispose(complete: true);
         }
 
-        // public IEnumerator GetEnumerator()
-        // {
-        //     yield return routine;
-        // }
+        public Job OnStart(JobCallback callback)
+        {
+            onStart += callback;
+            return this;
+        }
+
+        public Job OnComplete(JobCallback callback)
+        {
+            onComplete += callback;
+            return this;
+        }
 
         #endregion
         /*██████████████████████████████████████████████████████████*/

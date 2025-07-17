@@ -72,9 +72,8 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
             Instance.enabled = true;
         }
         
-        void Handle_PendingJob_OnDispose(object sender, EventArgs e)
+        void Handle_PendingJob_OnDispose(Job job)
         {
-            Job job = sender as Job;
             job.OnDispose -= Instance.Handle_PendingJob_OnDispose;
             pendingJobs.Remove(job);
         }
@@ -112,10 +111,9 @@ namespace Kokowolo.Base.Demo.SchedulingDemo
         //     return new JobSequence();
         // }
 
-        internal void Handle_Job_OnDispose(object sender, EventArgs e)
+        internal void Handle_Job_OnDispose(Job job)
         {
             // Handle if active job
-            Job job = sender as Job;
             job.OnDispose -= Handle_Job_OnDispose;
             activeJobs.Remove(job);
 

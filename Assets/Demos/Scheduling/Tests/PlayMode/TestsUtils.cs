@@ -15,7 +15,7 @@ using UnityEngine.SceneManagement;
 
 using Kokowolo.Base.Demo.SchedulingDemo;
 
-public static class Utils
+public static class TestsUtils
 {
     /*██████████████████████████████████████████████████████████*/
     #region Fields
