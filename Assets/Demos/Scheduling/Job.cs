@@ -10,10 +10,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Kokowolo.Utilities;
 
 namespace Kokowolo.Base.Demos.SchedulingDemo
 {
-    public class Job : IDisposable
+    public class Job : IEquatable<Job>, IDisposable
     {
         /*██████████████████████████████████████████████████████████*/
         #region Events
@@ -38,10 +39,10 @@ namespace Kokowolo.Base.Demos.SchedulingDemo
         #region Properties
 
         public bool IsDisposed => disposed;
-        public bool IsRunning => coroutine != null;
+        public bool IsRunning { get; private set; }
 
-        internal bool IsScheduled { get; private set; }
-        internal bool IsPending { get; set; } = true;
+        internal bool IsPending { get; set; } // marks for pending job removal
+        internal bool IsScheduled { get; set; }
 
         #endregion
         /*██████████████████████████████████████████████████████████*/
@@ -55,6 +56,10 @@ namespace Kokowolo.Base.Demos.SchedulingDemo
         {
             if (disposed) return;
             disposed = true;
+            // LogManager.Log($"Disposing {this}");
+
+            // Set data
+            IsPending = false;
 
             // Complete
             if (complete)
@@ -65,6 +70,7 @@ namespace Kokowolo.Base.Demos.SchedulingDemo
             // Release resources
             if (coroutine != null) 
             {
+                IsRunning = false;
                 JobManager.Instance.StopCoroutine(coroutine);
                 coroutine = null;
             }
@@ -75,44 +81,48 @@ namespace Kokowolo.Base.Demos.SchedulingDemo
             OnCompleteInternal = null;
         }
 
-        internal Job (Action function, float time) : this(Utils.InvokeFunctionAfterTime(function, time)) {}
+        public static Job Get(Action function) => Get(function, -1);
+        public static Job Get(Action function, float time) => new Job(function, time, isScheduled: false);
+        public static Job Get(IEnumerator routine) => new Job(routine, isScheduled: false);
+        public static Job Schedule(Action function) => Schedule(function, -1);
+        public static Job Schedule(Action function, float time) => new Job(function, time, isScheduled: true);
+        public static Job Schedule(IEnumerator routine) => new Job(routine, isScheduled: true);
+        Job(Action function, float time, bool isScheduled) : this(Utils.InvokeFunctionAfterTime(function, time), isScheduled) {}
+        Job(IEnumerator routine, bool isScheduled) : this(routine)
+        {
+            this.IsScheduled = isScheduled;
+            JobManager.Instance.PendJob(this);
+        }
+
+        // called by JobSequence specifically and pend constructor
+        internal Job(Action function, float time) : this(Utils.InvokeFunctionAfterTime(function, time)) {}
         internal Job(IEnumerator routine)
         {
             this.routine = routine;
             instanceId = id++;
         }
 
-        public static Job Get(Action function, float time) => Get(Utils.InvokeFunctionAfterTime(function, time));
-        public static Job Get(IEnumerator routine)
-        {
-            Job job = new Job(routine);
-            JobManager.PendJob(job);
-            return job;
-        }
-
-        public static Job Schedule(Action function, float time) => Schedule(Utils.InvokeFunctionAfterTime(function, time));
-        public static Job Schedule(IEnumerator routine)
-        {
-            Job job = new Job(routine);
-            return JobManager.ScheduleJob(job);
-        }
-
         internal void Start()
         {
-            if (disposed) 
+            if (IsDisposed) 
             {
                 throw new Exception($"[{nameof(Job)}] {nameof(Start)} called after {nameof(Dispose)}");
             }
-            if (coroutine != null) 
+            if (IsRunning) 
             {
                 throw new Exception($"[{nameof(Job)}] {nameof(Start)} called twice");
             }
-            JobManager.Instance.activeJobs.Add(this);
-            coroutine = JobManager.Instance.StartCoroutine(RunRoutine());
+            // if (IsScheduled)
+            // {
+            //     throw new Exception($"[{nameof(Job)}] {nameof(Start)} called before unscheduling");
+            // }
+            IsRunning = true;
+            coroutine = JobManager.Instance.StartCoroutine(Run());
         }
 
-        IEnumerator RunRoutine()
+        internal IEnumerator Run()
         {
+            // LogManager.Log($"Running {this}");
             OnStartInternal?.Invoke();
             yield return routine;
             Dispose(complete: true);
@@ -120,14 +130,45 @@ namespace Kokowolo.Base.Demos.SchedulingDemo
 
         public Job OnStart(JobCallback callback)
         {
+            if (IsDisposed) 
+            {
+                Kokowolo.Utilities.LogManager.LogWarning($"callback cannot be added on disposed job");
+                return null;
+            }
             OnStartInternal += callback;
             return this;
         }
 
         public Job OnComplete(JobCallback callback)
         {
+            if (IsDisposed) 
+            {
+                Kokowolo.Utilities.LogManager.LogWarning($"callback cannot be added on disposed job");
+                return null;
+            }
             OnCompleteInternal += callback;
             return this;
+        }
+
+        public bool Equals(Job other) => this == other;
+        public override bool Equals(object obj) => Equals(obj as Job);
+        public static bool operator !=(Job a, Job b) => !(a == b);
+        public static bool operator ==(Job a, Job b)
+        {
+            if (ReferenceEquals(a, b)) return true;
+            if (a is null) return false;
+            if (b is null) return false;
+            return a.instanceId == b.instanceId;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(instanceId);
+        }
+
+        public override string ToString()
+        {
+            return $"{nameof(Job)}{(IsScheduled ? "(s)" : "")}:{instanceId}";
         }
 
         #endregion

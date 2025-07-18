@@ -28,81 +28,67 @@ namespace Kokowolo.Base.Demos.SchedulingDemo
         public override void Dispose(bool complete = false)
         {
             if (disposed) return;
-            base.Dispose();
+            base.Dispose(complete);
             Utilities.ListPool.Release(ref jobs);
         }
 
-        JobSequence() : base(null) // NOTE: pass null because we can't pass Routine()
+        public static JobSequence Get() => new JobSequence(isScheduled: false);
+        public static JobSequence Schedule() => new JobSequence(isScheduled: true);
+        protected JobSequence(bool isScheduled) : base(null) // can't provide Routine() in header
         {
             jobs = Utilities.ListPool.Get<Job>();
             routine = Routine();
-        }
-
-        public static JobSequence Get()
-        {
-            JobSequence jobSequence = new JobSequence();
-            jobSequence.routine = jobSequence.Routine();
-            JobManager.PendJob(jobSequence);
-            return jobSequence;
-        }
-
-        public static JobSequence Schedule()
-        {
-            JobSequence jobSequence = new JobSequence();
-            // jobSequence.routine = jobSequence.Routine();
-            // JobManager.PendJob(jobSequence);
-            return jobSequence;
-
-            // job.OnDispose += Instance.Handle_Job_OnDispose;
-            // if (Instance.runningScheduledJob == null)
-            // {
-            //     Instance.runningScheduledJob = job;
-            //     Instance.activeJobs.Add(job);
-            //     job.Start();
-            // }
-            // else
-            // {
-            //     Instance.scheduledJobs.Add(job);
-            // }
-            // return job;
+            this.IsScheduled = isScheduled;
+            JobManager.Instance.PendJob(this);
         }
         
-
         IEnumerator Routine()
         {
             while (jobs.Count != 0)
             {
                 Job job = jobs[0];
                 jobs.Remove(job);
-                JobManager.StartJob(job);
-                yield return new WaitForJob(job);
+                yield return job.Run();
+                // yield return new WaitForJob(job);
             }
         }
 
-        public void Prepend(Action action, float time) => Prepend(new Job(action, time));
+        bool ValidateAddedJob(Job job)
+        {
+            if (IsRunning || job.IsRunning) 
+            {
+                Utilities.LogManager.LogWarning($"{nameof(JobSequence)} job already running"); 
+                return false;
+            }
+            if (job.IsScheduled) 
+            {
+                Utilities.LogManager.LogWarning($"{nameof(JobSequence)} job already scheduled"); 
+                return false;
+            }
+            job.IsPending = false;
+            job.IsScheduled = true;
+            return true;
+        }
+
+        public void Prepend(Action function) => Prepend(function, -1);
+        public void Prepend(Action function, float time) => Prepend(new Job(function, time));
         public void Prepend(IEnumerator routine) => Prepend(new Job(routine));
         public void Prepend(Job job)
         {
-            if (IsRunning || job.IsRunning)
-            {
-                Utilities.LogManager.Log($"{nameof(JobSequence)} job already running"); 
-                return;
-            }
-            job.IsPending = false;
-            jobs.Insert(0, job);
+            if (ValidateAddedJob(job)) jobs.Insert(0, job);
         }
 
-        public void Append(Action action, float time) => Append(new Job(action, time));
+        public void Append(Action function) => Append(function, -1);
+        public void Append(Action function, float time) => Append(new Job(function, time));
         public void Append(IEnumerator routine) => Append(new Job(routine));
         public void Append(Job job)
         {
-            if (IsRunning || job.IsRunning)
-            {
-                Utilities.LogManager.Log($"{nameof(JobSequence)} job already running"); 
-                return;
-            }
-            job.IsPending = false;
-            jobs.Add(job);
+            if (ValidateAddedJob(job)) jobs.Add(job);
+        }
+
+        public override string ToString()
+        {
+            return $"{nameof(JobSequence)}{(IsScheduled ? "(s)" : "")}:{instanceId}";
         }
 
         #endregion

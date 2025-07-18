@@ -19,10 +19,9 @@ namespace Kokowolo.Base.Demos.SchedulingDemo
         /*██████████████████████████████████████████████████████████*/
         #region Fields
 
-        internal List<Job> pendingJobs;
-        internal List<Job> scheduledJobs;
-        internal List<Job> activeJobs;
-        Job runningScheduledJob;
+        Queue<Job> pendingJobs;
+        Queue<Job> scheduledJobs;
+        List<Job> activeJobs;
         
         #endregion
         /*██████████████████████████████████████████████████████████*/
@@ -37,88 +36,88 @@ namespace Kokowolo.Base.Demos.SchedulingDemo
 
         protected override void Singleton_OnDestroy()
         {
-            ListPool.Release(ref pendingJobs);
-            ListPool.Release(ref scheduledJobs);
+            pendingJobs = null;
+            scheduledJobs = null;
             ListPool.Release(ref activeJobs);
         }
 
         protected override void Singleton_Awake()
         {
-            pendingJobs = ListPool.Get<Job>();
-            scheduledJobs = ListPool.Get<Job>();
+            pendingJobs = new Queue<Job>();
+            scheduledJobs = new Queue<Job>();
             activeJobs = ListPool.Get<Job>();
         }
 
         void LateUpdate()
         {
-            // Validate pending jobs
-            for (int i = pendingJobs.Count - 1; i >= 0; i--)
-            {
-                Job job = pendingJobs[i];
-                if (job.IsPending)
-                {
-                    job.OnDispose -= Handle_PendingJob_OnDispose;
-                    StartJob(job);
-                }
-                pendingJobs.RemoveAt(i);
-            }
+            // End LateUpdate refresh
             enabled = false;
+
+            // Prevent newly created jobs from intefering with this update
+            // var pendingJobs = new Queue<Job>();
+            // foreach (var i in this.pendingJobs)
+            // {
+            //     pendingJobs.Enqueue(i);
+            // }
+            // this.pendingJobs.Clear();
+
+            // Handle/start pending jobs
+            while (pendingJobs.Count > 0)
+            {
+                Job job = pendingJobs.Dequeue();
+                if (job.IsPending) 
+                {
+                    job.IsPending = false;
+                    if (job.IsScheduled)
+                    {
+                        Schedule(job);
+                    }
+                    else
+                    {
+                        StartJob(job);
+                    }
+                }
+            }
         }
 
-        internal static void PendJob(Job job)
+        internal void PendJob(Job job)
         {
-            job.OnDispose += Instance.Handle_PendingJob_OnDispose;
             job.IsPending = true;
-            Instance.pendingJobs.Add(job);
-            Instance.enabled = true;
+            pendingJobs.Enqueue(job);
+            enabled = true;
         }
         
-        void Handle_PendingJob_OnDispose(Job job)
+        void StartJob(Job job)
         {
-            job.OnDispose -= Instance.Handle_PendingJob_OnDispose;
-            pendingJobs.Remove(job);
-        }
-        
-        internal static Job StartJob(Job job)
-        {
-            job.OnDispose += Instance.Handle_Job_OnDispose;
+            // job.IsScheduled = false;
+            job.OnDispose += Handle_Job_OnDispose;
+            activeJobs.Add(job);
             job.Start();
-            return job;
         }
 
-        internal static Job ScheduleJob(Job job)
-        {
-            job.OnDispose += Instance.Handle_Job_OnDispose;
-            if (Instance.runningScheduledJob == null)
+        void Schedule(Job job)
+        {   
+            scheduledJobs.Enqueue(job);
+            job = scheduledJobs.Peek();
+            if (!job.IsRunning)
             {
-                Instance.runningScheduledJob = job;
-                job.Start();
+                StartJob(job);
             }
-            else
-            {
-                Instance.scheduledJobs.Add(job);
-            }
-            return job;
         }
 
-        internal void Handle_Job_OnDispose(Job job)
+        void Handle_Job_OnDispose(Job job)
         {
             // Handle if active job
-            job.OnDispose -= Handle_Job_OnDispose;
-            activeJobs.Remove(job);
-
-            // Handle if non-running scheduled job
-            if (scheduledJobs.Remove(job)) return;
+            if (!activeJobs.Remove(job)) throw new Exception("impossible state reached");
 
             // Handle if running scheduled job
-            if (runningScheduledJob == null || runningScheduledJob.instanceId != job.instanceId) return;
-            runningScheduledJob = null;
+            if (!job.IsScheduled) return;
 
             // Handle next scheduled job
+            if (scheduledJobs.Count == 0) throw new Exception("impossible state reached");
+            scheduledJobs.Dequeue();
             if (scheduledJobs.Count == 0) return;
-            runningScheduledJob = scheduledJobs[0];
-            scheduledJobs[0].Start();
-            scheduledJobs.RemoveAt(0);
+            StartJob(scheduledJobs.Peek());
         }
 
         #endregion
