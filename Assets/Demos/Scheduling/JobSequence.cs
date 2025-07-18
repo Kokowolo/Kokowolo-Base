@@ -53,37 +53,31 @@ namespace Kokowolo.Base.Demos.SchedulingDemo
             }
         }
 
-        bool ValidateAddedJob(Job job)
+        bool ValidateSequence()
         {
-            if (IsRunning || job.IsRunning) 
-            {
-                Utilities.LogManager.LogWarning($"{nameof(JobSequence)} job already running"); 
-                return false;
-            }
-            if (job.IsScheduled) 
-            {
-                Utilities.LogManager.LogWarning($"{nameof(JobSequence)} job already scheduled"); 
-                return false;
-            }
-            job.IsPending = false;
+            if (!IsRunning) return true;
+            Utilities.LogManager.LogWarning($"job already running"); 
+            return false;
+        }
+
+        public Job Prepend(Action function) => Prepend(function, -1);
+        public Job Prepend(Action function, float time) => ValidateSequence() ? Prepend(new Job(function, time)) : null;
+        public Job Prepend(IEnumerator routine) => ValidateSequence() ? Prepend(new Job(routine)) : null;
+        Job Prepend(Job job)
+        {
             job.IsScheduled = true;
-            return true;
+            jobs.Insert(0, job);
+            return job;
         }
 
-        public void Prepend(Action function) => Prepend(function, -1);
-        public void Prepend(Action function, float time) => Prepend(new Job(function, time));
-        public void Prepend(IEnumerator routine) => Prepend(new Job(routine));
-        public void Prepend(Job job)
+        public Job Append(Action function) => Append(function, -1);
+        public Job Append(Action function, float time) => ValidateSequence() ? Append(new Job(function, time)) : null;
+        public Job Append(IEnumerator routine) => ValidateSequence() ? Append(new Job(routine)) : null;
+        Job Append(Job job)
         {
-            if (ValidateAddedJob(job)) jobs.Insert(0, job);
-        }
-
-        public void Append(Action function) => Append(function, -1);
-        public void Append(Action function, float time) => Append(new Job(function, time));
-        public void Append(IEnumerator routine) => Append(new Job(routine));
-        public void Append(Job job)
-        {
-            if (ValidateAddedJob(job)) jobs.Add(job);
+            job.IsScheduled = true;
+            jobs.Add(job);
+            return job;
         }
 
         public override string ToString()

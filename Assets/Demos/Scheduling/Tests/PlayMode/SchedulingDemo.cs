@@ -193,9 +193,9 @@ public class SchedulingDemo
         // Demo main
         int value = 0;
         JobSequence s0 = JobSequence.Get();
-        Job p1 = Job.Get(Function1, PlayModeConfig.Time); s0.Append(p1);
+        Job p1 = s0.Append(Function1, PlayModeConfig.Time);
         s0.Append(Function1, PlayModeConfig.Time);
-        Job p2 = Job.Get(Function1, PlayModeConfig.Time); s0.Append(p2);
+        Job p2 = s0.Append(Function1, PlayModeConfig.Time);
 
         // Declare local function
         void Function1()
@@ -235,8 +235,8 @@ public class SchedulingDemo
         // Demo main
         int value = 0;
         JobSequence s0 = JobSequence.Get();
-        Job p1 = Job.Get(Function1(1, PlayModeConfig.Time * 3)); s0.Append(p1);
-        Job p2 = Job.Get(Function1(3, PlayModeConfig.Time)); s0.Append(p2);
+        Job p1 = s0.Append(Function1(1, PlayModeConfig.Time * 3));
+        Job p2 = s0.Append(Function1(3, PlayModeConfig.Time));
         s0.Append(Function1(2, PlayModeConfig.Time));
         
         // Declare local function
@@ -277,10 +277,10 @@ public class SchedulingDemo
         // Demo main
         int value = 0;
         JobSequence s0 = JobSequence.Get();
-        s0.Append(Job.Get(Function1, .3f));
-        Job p1 = Job.Get(Function1, -1); s0.Append(p1);
-        s0.Append(Job.Get(Function1, -1));
-        Job p2 = Job.Get(Function1, -1f);
+        s0.Append(Function1, .3f);
+        Job p1 = s0.Append(Function1);
+        s0.Append(Function1);
+        Job p2 = Job.Get(Function1);
 
         // Declare local function
         void Function1()
@@ -411,8 +411,8 @@ public class SchedulingDemo
         int value = 0;
         JobSequence s0 = JobSequence.Schedule();
         s0.Append(() => Add(1));
-        var p1 = Job.Get(() => Add(2)); s0.Append(p1);
-        var p2 = Job.Get(() => Add(3)); s0.Append(p2);
+        var p1 = s0.Append(() => Add(2));
+        var p2 = s0.Append(() => Add(3));
         s0.Append(() => Add(9));
 
         p1.OnComplete(() => p2.Dispose(false));
@@ -446,7 +446,7 @@ public class SchedulingDemo
         // Demo main
         int value = 0;
         JobSequence s0 = JobSequence.Schedule();
-        var p1 = Job.Get(() => Add(1)); s0.Append(p1);
+        var p1 = s0.Append(() => Add(1));
         s0.Append(() => Add(2));
 
         Job p3 = null;
@@ -454,13 +454,14 @@ public class SchedulingDemo
         p1.OnStart(() =>
         {
             Debug.Assert(value == 0);
-            p3 = Job.Get(() => Add(100)); 
+            p3 = s0.Append(() => Add(100));
             r3 = new WeakReference(p3);
-            Debug.Assert(r3.IsAlive);
-            s0.Append(p3);
-            p3.Dispose();
+            Debug.Assert(!r3.IsAlive);
 
-            p3.OnStart(() => Debug.Assert(false));
+            // New API, now only the first assertion should run
+            Debug.Assert(p3 == null);
+            p3?.Dispose();
+            p3?.OnStart(() => Debug.Assert(false));
         });
 
         // Declare local function
@@ -474,7 +475,7 @@ public class SchedulingDemo
         // Demo check
         yield return new WaitForJobManager();
         Debug.Assert(value == 3, $"value:{value}");
-        Debug.Assert(s0.IsDisposed && p1.IsDisposed && p3.IsDisposed);
+        Debug.Assert(s0.IsDisposed && p1.IsDisposed && p3 == null);
 
         // Evaluate GC
         s0 = null;
