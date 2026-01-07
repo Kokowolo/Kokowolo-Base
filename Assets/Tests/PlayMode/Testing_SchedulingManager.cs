@@ -1,3 +1,5 @@
+#pragma warning disable 0618
+
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
@@ -296,3 +298,4 @@ public class Testing_SchedulingManager
     #endregion
     /************************************************************/
 }
+#pragma warning restore 0618

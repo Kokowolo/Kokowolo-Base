@@ -81,51 +81,46 @@ namespace Kokowolo.Grid
 
         private GridCoordinates GetCoordinatesFromScreenPoint()
         {
-            // HACK: CursorWorldManager is not implemented here apparently, so I am currently uncommenting this entire function 🤷‍♂️
-            throw new System.NotImplementedException();
-            // // HACK: move this to Grid package
-            // GridCoordinates coordinates = GridCoordinates.Invalid;
-            // if (CursorWorldManager.HasValidHitInfo)
-            // {
-            //     // if (CursorManager.HitInfo.transform.gameObject.IsInLayerMask(LayerManager.UnitLayerMask))
-            //     // {
-            //     //     coordinates = CursorManager.HitInfo.transform.GetComponentInParent<Unit>().Transform.Coordinates;
-            //     // }
-            //     // else
-            //     // {
-            //         Vector3 localPosition = GridManager.Instance.transform.InverseTransformPoint(CursorWorldManager.HitInfo.point);
-            //         coordinates = new GridCoordinates(localPosition);
-            //     // }
-            // }   
-            // return coordinates;
+            // HACK: move this to Grid package
+            GridCoordinates coordinates = GridCoordinates.Invalid;
+            if (WorldCursorManager.ValidHitInfo)
+            {
+                // if (CursorManager.HitInfo.transform.gameObject.IsInLayerMask(LayerManager.UnitLayerMask))
+                // {
+                //     coordinates = CursorManager.HitInfo.transform.GetComponentInParent<Unit>().Transform.Coordinates;
+                // }
+                // else
+                // {
+                    Vector3 localPosition = GridManager.Instance.transform.InverseTransformPoint(WorldCursorManager.HitInfo.point);
+                    coordinates = new GridCoordinates(localPosition);
+                // }
+            }   
+            return coordinates;
         }
 
         private void UpdateGridCoordinates()
         {
-            // HACK: BaseInputManager is not implemented here apparently, so I am currently uncommenting this entire function 🤷‍♂️
-            throw new System.NotImplementedException();
+            nextCoordinates = GetCoordinatesFromScreenPoint();
+            // Debug.Log($"GridCursorController {nextCoordinates}");
+            if (GridManager.Map.Contains(nextCoordinates) && !GridManager.Map.GetCell(nextCoordinates).IsExplorable) 
+            {
+                nextCoordinates = GridCoordinates.Invalid;
+            }
 
-            // nextCoordinates = GetCoordinatesFromScreenPoint();
-            // // Debug.Log($"GridCursorController {nextCoordinates}");
-            // if (GridManager.Map.Contains(nextCoordinates) && !GridManager.Map.GetCell(nextCoordinates).IsExplorable) 
-            // {
-            //     nextCoordinates = GridCoordinates.Invalid;
-            // }
+            if (InputManager.IsPointerOverUI()) 
+            {
+                nextCoordinates = GridCoordinates.Invalid;
+            }
+            else
+            {
+                if (!GridManager.Map.Contains(nextCoordinates) || nextCoordinates == Coordinates) return;
 
-            // if (BaseInputManager.IsMouseOverUI()) 
-            // {
-            //     nextCoordinates = GridCoordinates.Invalid;
-            // }
-            // else
-            // {
-            //     if (!GridManager.Map.Contains(nextCoordinates) || nextCoordinates == Coordinates) return;
-
-            //     eventArgs.previous = Coordinates;
-            //     eventArgs.current = nextCoordinates;
-            //     Coordinates = nextCoordinates;
-            //     OnCoordinatesChanged?.Invoke(this, eventArgs);
-            //     UpdateGridMapVisual();
-            // }        
+                eventArgs.previous = Coordinates;
+                eventArgs.current = nextCoordinates;
+                Coordinates = nextCoordinates;
+                OnCoordinatesChanged?.Invoke(this, eventArgs);
+                UpdateGridMapVisual();
+            }        
         }
 
         private void UpdateGridMapVisual()

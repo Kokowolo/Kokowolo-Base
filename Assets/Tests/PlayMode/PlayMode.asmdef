@@ -4,7 +4,8 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Kokowolo.Utilities"
+        "Kokowolo.Utilities",
+        "Kokowolo.Utilities.Tests"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -44,14 +44,14 @@ public class TestGridPathfinding : IPathfinding
     /************************************************************/
     #region Functions
 
-    List<Node> IPathfinding.GetNeighborsFromNode(Node node)
+    List<INode> IPathfinding.GetNeighborsFromNode(INode iNode)
     {
-        return node.GetNeighbors();
+        return iNode.Node.GetNeighbors();
     }
 
-    bool IPathfinding.IsValidMoveBetweenNodes(Node start, Node end)
+    bool IPathfinding.IsValidMoveBetweenNodes(INode start, INode end)
     {
-        return IsValidMoveBetweenNodes((start as Node<GridCell>).Owner, (end as Node<GridCell>).Owner);
+        return IsValidMoveBetweenNodes(start.ToCell(), end.ToCell());
     }
 
     private bool IsValidMoveBetweenNodes(GridCell start, GridCell end)
@@ -68,17 +68,17 @@ public class TestGridPathfinding : IPathfinding
         // GridManager.Map.GetCellsBelowCoordinates
     }
 
-    int IPathfinding.GetHeuristicCostBetweenNodes(Node start, Node end)
+    int IPathfinding.GetHeuristicCostBetweenNodes(INode start, INode end)
     {
-        return start.GetCell().Coordinates.GetDistanceTo(end.GetCell().Coordinates, ignoreLevelDistance: true, ignoreFallDistance: false);
+        return start.ToCell().Coordinates.GetDistanceTo(end.ToCell().Coordinates, ignoreLevelDistance: true, ignoreFallDistance: false);
     }
 
-    int IPathfinding.GetMoveCostBetweenNodes(Node start, Node end)
+    int IPathfinding.GetMoveCostBetweenNodes(INode start, INode end)
     {
         return 1;
     }
 
-    bool IPathfinding.IsPathOutsideMovementRange(NodePath path)
+    bool IPathfinding.IsPathOutsideMovementRange(INodePath path)
     {
         return false;
     }

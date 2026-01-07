@@ -19,7 +19,7 @@ using Kokowolo.Utilities;
 
 public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
 {
-    /************************************************************/
+    /*██████████████████████████████████████████████████████████*/
     #region Enum
 
     private enum InputMode
@@ -30,7 +30,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     }
     
     #endregion
-    /************************************************************/
+    /*██████████████████████████████████████████████████████████*/
     #region Fields
 
     [Header("Cached References")]
@@ -48,7 +48,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     [SerializeField] private GridTransform gridTransform;
 
     private (GridCell, GridMapVisualJob)[] cellJobs = new (GridCell, GridMapVisualJob)[3];
-    private NodePath searchPath = new NodePath();
+    private INodePath searchPath = new INodePath();
     GridMapVisualJob searchPathVisualJob;
 
     GridMapVisualJob visualJob;
@@ -60,7 +60,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     private InputMode mode = InputMode.Mode1;
  
     #endregion
-    /************************************************************/
+    /*██████████████████████████████████████████████████████████*/
     #region Properties
 
     // Input
@@ -89,7 +89,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     private bool Input_DirectionCheck => Input.GetKeyDown(KeyCode.C);
 
     #endregion
-    /************************************************************/
+    /*██████████████████████████████████████████████████████████*/
     #region Functions
 
     private void Start()
@@ -119,7 +119,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
         // Switch Mode
         if (Input_SwitchMode) 
         {
-            mode = (InputMode) KokoMath.WrapClamp((int) mode + 1, 0, EnumUtils.GetCount<InputMode>());
+            mode = (InputMode) KokoMath.WrapClamp((int) mode + 1, 0, EnumExtensions.GetCount<InputMode>());
             modeText.text = $"{mode}";
         }
 
@@ -285,11 +285,11 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
 
         if (start != end && start != null && end != null)
         {
-            searchPath = AStarPathfinding.GetPath(TestGridPathfinding.Instance, start.Node, end.Node, range);
+            searchPath = AStarPathfinding.GetPath(TestGridPathfinding.Instance, start, end, range);
             List<GridCell> cells = new List<GridCell>();
-            foreach (Node node in searchPath)
+            foreach (INode node in searchPath)
             {
-                cells.Add(node.GetCell());
+                cells.Add(node as GridCell);
             }
 
             if (searchPathVisualJob == null)
@@ -370,11 +370,11 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     private IEnumerator ShowAllSearchedNodes()
     {
         GridCell cell = GridCursorController.Instance.Cell;
-        List<Node> nodes = AStarPathfinding.GetAllSearchedNodes(TestGridPathfinding.Instance, cell.Node, range);
+        List<INode> nodes = AStarPathfinding.GetAllSearchedNodes(TestGridPathfinding.Instance, cell, range);
         List<GridCell> cells = ListPool.Get<GridCell>();
-        foreach (Node node in nodes)
+        foreach (INode node in nodes)
         {
-            cells.Add(node.GetCell());
+            cells.Add(node as GridCell);
         }
 
         var job = GridManager.Visual.CreateVisualJob(GridMapVisualJob.JobType.Minis, cells, color: KokoRandom.Color());
@@ -417,5 +417,5 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     #endregion
 
     #endregion
-    /************************************************************/
+    /*██████████████████████████████████████████████████████████*/
 }
