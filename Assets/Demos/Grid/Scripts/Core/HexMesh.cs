@@ -60,11 +60,11 @@ public class HexMesh : CustomMesh
     {
         Clear();
         List<GridCell> cells = new List<GridCell>();
-        for (int z = 0; z < GridManager.Map.CellCountZ; z++)
+        for (int z = 0; z < GridManager.TargetMapObject.Map.Structure.Zone.CountZ; z++)
         {
-            for (int x = 0; x < GridManager.Map.CellCountX; x++)
+            for (int x = 0; x < GridManager.TargetMapObject.Map.Structure.Zone.CountX; x++)
             {
-                cells.Add(GridManager.Map.GetCell(new GridCoordinates(0, z, x)));
+                cells.Add(GridManager.TargetMapObject.Map.GetCell(new GridCoordinates(0, z, x)));
             }
         }
         Triangulate(cells);
@@ -75,12 +75,12 @@ public class HexMesh : CustomMesh
     {
         foreach (GridCell cell in cells)
         {
-            Vector3 v0 = KokoRandom.Perturb(GridMetrics.Corners[0] + cell.SurfacePosition, noiseStrength, useY: false);
-            Vector3 v1 = KokoRandom.Perturb(GridMetrics.Corners[1] + cell.SurfacePosition, noiseStrength, useY: false);
-            Vector3 v2 = KokoRandom.Perturb(GridMetrics.Corners[2] + cell.SurfacePosition, noiseStrength, useY: false);
-            Vector3 v3 = KokoRandom.Perturb(GridMetrics.Corners[3] + cell.SurfacePosition, noiseStrength, useY: false);
-            Vector3 v4 = KokoRandom.Perturb(GridMetrics.Corners[4] + cell.SurfacePosition, noiseStrength, useY: false);
-            Vector3 v5 = KokoRandom.Perturb(GridMetrics.Corners[5] + cell.SurfacePosition, noiseStrength, useY: false);
+            Vector3 v0 = KokoRandom.Perturb(GridMetrics.GetCorner(GridDirectionExtensions.GetDirection(0)) + cell.SurfacePosition, noiseStrength, useY: false);
+            Vector3 v1 = KokoRandom.Perturb(GridMetrics.GetCorner(GridDirectionExtensions.GetDirection(1)) + cell.SurfacePosition, noiseStrength, useY: false);
+            Vector3 v2 = KokoRandom.Perturb(GridMetrics.GetCorner(GridDirectionExtensions.GetDirection(2)) + cell.SurfacePosition, noiseStrength, useY: false);
+            Vector3 v3 = KokoRandom.Perturb(GridMetrics.GetCorner(GridDirectionExtensions.GetDirection(3)) + cell.SurfacePosition, noiseStrength, useY: false);
+            Vector3 v4 = KokoRandom.Perturb(GridMetrics.GetCorner(GridDirectionExtensions.GetDirection(4)) + cell.SurfacePosition, noiseStrength, useY: false);
+            Vector3 v5 = KokoRandom.Perturb(GridMetrics.GetCorner(GridDirectionExtensions.GetDirection(5)) + cell.SurfacePosition, noiseStrength, useY: false);
 
             AddTriangle(v0, v1, v5, subdivisions);
             AddQuad(v1, v2, v4, v5, subdivisions);

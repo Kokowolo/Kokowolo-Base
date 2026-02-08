@@ -17,7 +17,7 @@ using Kokowolo.Grid;
 using Kokowolo.Pathfinding;
 using Kokowolo.Utilities;
 
-public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
+public class TestGridPipelineManager : MonoBehaviour, IGridMapObject
 {
     /*██████████████████████████████████████████████████████████*/
     #region Enum
@@ -33,11 +33,15 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     /*██████████████████████████████████████████████████████████*/
     #region Fields
 
-    [Header("Cached References")]
+    [Header("References")]
     [SerializeField] private GameObject debugGridTransformVisual;
     [SerializeField] private TMPro.TextMeshProUGUI modeText;
 
-    [Header("Grid Pipeline Settings")]
+    [Header("References: IGridMapObject")]
+    [SerializeField] GridMetrics _Metrics;
+    [SerializeField] GridMap _Map;
+    
+    [Header("Old Grid Pipeline Settings")]
     [SerializeField] private LayerMask gridMapLayerMask;
     [SerializeField] private LayerMask gridSurfaceLayerMask;
     [SerializeField] private LayerMask gridSurfaceSoftLayerMask;
@@ -48,7 +52,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     [SerializeField] private GridTransform gridTransform;
 
     private (GridCell, GridMapVisualJob)[] cellJobs = new (GridCell, GridMapVisualJob)[3];
-    private INodePath searchPath = new INodePath();
+    private NodePath searchPath = new NodePath();
     GridMapVisualJob searchPathVisualJob;
 
     GridMapVisualJob visualJob;
@@ -62,6 +66,11 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     #endregion
     /*██████████████████████████████████████████████████████████*/
     #region Properties
+
+    public GridIO IO => throw new System.NotImplementedException();
+    public GridMetrics Metrics => _Metrics;
+    public IPathfinding Pathfinding => TestGridPathfinding.Instance;
+    public GridMap Map => _Map;
 
     // Input
     private bool Input_SwitchMode => Input.GetKeyDown(KeyCode.Tab);
@@ -94,7 +103,9 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
 
     private void Start()
     {
-        gridTransform.Init(transform);
+        Map.SetSize();
+        Map.UpdateNavigation();
+        gridTransform.Init(debugGridTransformVisual.transform);
         RefreshGridTransform();
 
         modeText.text = $"{mode}";
@@ -104,8 +115,8 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     {
         // SHOW CENTER POINT
         {
-            Vector3 point1 = GridManager.Map.GetLocalCenterPosition();
-            Vector3 point2 = GridManager.Map.GetLocalCenterPosition(useOnlyExplorableCells: false);
+            Vector3 point1 = GridManager.TargetMapObject.Map.ExplorableBounds.center;
+            Vector3 point2 = GridManager.TargetMapObject.Map.StructureBounds.center;
             point1 = GridManager.Instance.transform.TransformPoint(point1);
             point2 = GridManager.Instance.transform.TransformPoint(point2);
             Debug.DrawLine(point1, point1 + GridManager.Instance.transform.rotation * new Vector3(0, 100, 0), Color.blue);
@@ -194,7 +205,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
             // call function
             GridPositioning.Rotate(ref coordinatesList, startDir, direction);
             // update visual
-            for (int i = 0; i < visualCells.Count; i++) visualCells[i] = GridManager.Map.GetCell(coordinatesList[i]);
+            for (int i = 0; i < visualCells.Count; i++) visualCells[i] = GridManager.TargetMapObject.Map.GetCell(coordinatesList[i]);
             visualJobs[visualJobs.Count - 1].Update(coordinatesList);
         }
     }
@@ -203,11 +214,13 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     {
         if (Input_ToggleGridManagerActive)
         {
-            GridManager.SetActive(!GridManager.Instance.gameObject.activeSelf);
+            throw new System.NotImplementedException();
+            // GridManager.SetActive(!GridManager.Instance.gameObject.activeSelf);
         }
         if (Input_CreateMap)
         {
-            GridManager.Map.Create();
+            throw new System.NotImplementedException();
+            // GridManager.TargetMapObject.Map.Create();
         }
         if (Input_RangeDecrease)
         {
@@ -317,8 +330,8 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
         GridCell cellB = cellJobs[1].Item1;
         GridCell cellC = cellJobs[2].Item1;
 
-        GridDirection inDirection = GridCoordinates.GetDirectionToCoordinates(cellC.Coordinates, cellA.Coordinates);
-        GridDirection outDirection = GridCoordinates.GetDirectionToCoordinates(cellA.Coordinates, cellB.Coordinates);
+        GridDirection inDirection = cellC.Coordinates.GetDirectionToCoordinates(cellA.Coordinates);
+        GridDirection outDirection = cellA.Coordinates.GetDirectionToCoordinates(cellB.Coordinates);
         Debug.Log($"In: {inDirection}, Out: {outDirection}, Rotations Away:{inDirection.Distance(outDirection)}");
     }
 
@@ -327,13 +340,13 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
         // set coordinates
         if (coordinates != null)
         {
-            gridTransform.SetCoordinates((GridCoordinates) coordinates);
+            gridTransform.Coordinates = (GridCoordinates) coordinates;
         }
 
         // set direction
         if (direction != null)
         {
-            gridTransform.SetDirection((GridDirection) direction);
+            gridTransform.Direction = (GridDirection) direction;
         }
 
         // set GridTransform visual
@@ -341,13 +354,13 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
         {
             gridTransformVisualJob = GridManager.Visual.CreateVisualJob(
                 GridMapVisualJob.JobType.Group, 
-                gridTransform.GetOverlappingCoordinatesList(), 
+                gridTransform.GetOccupyingCoordsList(), 
                 color: Color.magenta
             );
         }
         else
         {
-            gridTransformVisualJob.Update(gridTransform.GetOverlappingCoordinatesList());
+            gridTransformVisualJob.Update(gridTransform.GetOccupyingCoordsList());
         }
 
         // SetDebugGridTransformVisual
@@ -389,27 +402,27 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
 
     #region Interface Functions
 
-    public LayerMask GetGridMapLayerMask()
+    LayerMask IGridMapObject.GetGridMapLayerMask()
     {
         return gridMapLayerMask;
     }
 
-    public LayerMask GetGridSurfaceLayerMask()
+    LayerMask IGridMapObject.GetGridSurfaceLayerMask()
     {
         return gridSurfaceLayerMask;
     }
 
-    public LayerMask GetGridSurfaceSoftLayerMask()
+    LayerMask IGridMapObject.GetGridSurfaceSoftLayerMask()
     {
         return gridSurfaceSoftLayerMask;
     }
 
-    public string GetGridTag()
+    string IGridMapObject.GetGridTag()
     {
         return gridTag;
     }
 
-    public GridCell GetGridCell(GridCoordinates coordinates)
+    GridCell IGridMapObject.CreateGridCell(GridCoordinates coordinates)
     {
         return new TestGridCell(coordinates);
     }
@@ -417,5 +430,16 @@ public class TestGridPipelineManager : MonoBehaviour, IGridPipeline
     #endregion
 
     #endregion
+    /*██████████████████████████████████████████████████████████*/
+#if UNITY_EDITOR
+    #region Editor
+    
+    void OnDrawGizmos()
+    {
+        Map.DrawGizmos();
+    }
+    
+    #endregion
+#endif
     /*██████████████████████████████████████████████████████████*/
 }

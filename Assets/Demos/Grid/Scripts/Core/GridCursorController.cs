@@ -51,7 +51,7 @@ namespace Kokowolo.Grid
         /// <summary>
         /// Get the Cell on Coordinates, which might be null
         /// </summary>
-        public GridCell Cell => GridManager.Map.GetCell(Coordinates);
+        public GridCell Cell => GridManager.TargetMapObject.Map.GetCell(Coordinates);
         
         /// <summary>
         /// Get the Unit on Coordinates, which might be null
@@ -64,14 +64,14 @@ namespace Kokowolo.Grid
 
         protected override void Singleton_Awake()
         {
-            GridManager.OnGridEnabled += Handle_GridManager_OnGridEnabled;
-            GridManager.OnGridDisabled += Handle_GridManager_OnGridDisabled;
+            GridManager.TargetMapObject.Map.OnEnabled += Handle_GridMap_OnEnabled;
+            GridManager.TargetMapObject.Map.OnDisabled += Handle_GridMap_OnDisabled;
         }
 
         protected override void Singleton_OnDestroy()
         {
-            GridManager.OnGridEnabled -= Handle_GridManager_OnGridEnabled;
-            GridManager.OnGridDisabled -= Handle_GridManager_OnGridDisabled;
+            GridManager.TargetMapObject.Map.OnEnabled -= Handle_GridMap_OnEnabled;
+            GridManager.TargetMapObject.Map.OnDisabled -= Handle_GridMap_OnDisabled;
         }
 
         private void LateUpdate() 
@@ -92,7 +92,7 @@ namespace Kokowolo.Grid
                 // else
                 // {
                     Vector3 localPosition = GridManager.Instance.transform.InverseTransformPoint(WorldCursorManager.HitInfo.point);
-                    coordinates = new GridCoordinates(localPosition);
+                    coordinates = GridPositioning.GetCoordinates(localPosition);
                 // }
             }   
             return coordinates;
@@ -102,7 +102,7 @@ namespace Kokowolo.Grid
         {
             nextCoordinates = GetCoordinatesFromScreenPoint();
             // Debug.Log($"GridCursorController {nextCoordinates}");
-            if (GridManager.Map.Contains(nextCoordinates) && !GridManager.Map.GetCell(nextCoordinates).IsExplorable) 
+            if (GridManager.TargetMapObject.Map.Structure.Zone.Contains(nextCoordinates) && !GridManager.TargetMapObject.Map.GetCell(nextCoordinates).IsExplorable) 
             {
                 nextCoordinates = GridCoordinates.Invalid;
             }
@@ -113,7 +113,7 @@ namespace Kokowolo.Grid
             }
             else
             {
-                if (!GridManager.Map.Contains(nextCoordinates) || nextCoordinates == Coordinates) return;
+                if (!GridManager.TargetMapObject.Map.Structure.Zone.Contains(nextCoordinates) || nextCoordinates == Coordinates) return;
 
                 eventArgs.previous = Coordinates;
                 eventArgs.current = nextCoordinates;
@@ -139,13 +139,13 @@ namespace Kokowolo.Grid
             }
         }
 
-        private void Handle_GridManager_OnGridEnabled(object sender, EventArgs e)
+        private void Handle_GridMap_OnEnabled(object sender, EventArgs e)
         {
             gameObject.SetActive(true);
             // CursorManager.LayerMask = LayerManager.GridCursorLayerMask;
         }
 
-        private void Handle_GridManager_OnGridDisabled(object sender, EventArgs e)
+        private void Handle_GridMap_OnDisabled(object sender, EventArgs e)
         {
             gameObject.SetActive(false);
         }

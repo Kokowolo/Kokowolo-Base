@@ -10,6 +10,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 
 using Kokowolo.Utilities;
+using Kokowolo.Utilities.Legacy;
 
 public class Testing_SchedulingManager
 {

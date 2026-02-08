@@ -16,7 +16,7 @@ using UnityEngine;
 using Kokowolo.Grid;
 using Kokowolo.Pathfinding;
 
-public class TestGridPathfinding : IPathfinding
+public class TestGridPathfinding : IPathfinding, IPathfinder
 {
     /************************************************************/
     #region Fields
@@ -44,20 +44,42 @@ public class TestGridPathfinding : IPathfinding
     /************************************************************/
     #region Functions
 
-    List<INode> IPathfinding.GetNeighborsFromNode(INode iNode)
+    IEnumerable<INode> IPathfinder.GetNeighborsFromNode(INode iNode)
     {
-        return iNode.Node.GetNeighbors();
+        // Get one cell above (unless it's null)
+        GridCell start = (iNode.ToCell().Coordinates + GridCoordinates.Up).ToCell() ?? iNode.ToCell();
+
+        // Search around this "up" cell
+        foreach (var direction in GridDirectionExtensions.GetDirections())
+        {
+            // Continue if border
+            if (!start.TryGetInDirection(direction, out GridCell neighbor)) continue;
+
+            // If HasSurface, this is a step
+            if (neighbor.HasSurface && neighbor.IsExplorable) 
+            {
+                yield return neighbor;
+            }
+            else // Drill down until first Explorable or Ground
+            {
+                if (GridManager.TargetMapObject.Map.Structure.TraverseWhile(neighbor.Coordinates, GridCoordinates.Down,  out neighbor, _Predicate))
+                {
+                    if (neighbor.IsExplorable) yield return neighbor;
+                }
+            }
+        }
+
+        static bool _Predicate(GridCell cell)
+        {
+            return !cell.IsExplorable && !cell.HasSurface;
+        }
     }
 
-    bool IPathfinding.IsValidMoveBetweenNodes(INode start, INode end)
-    {
-        return IsValidMoveBetweenNodes(start.ToCell(), end.ToCell());
-    }
-
+    bool IPathfinder.IsValidMoveBetweenNodes(INode start, INode end) => IsValidMoveBetweenNodes(start.ToCell(), end.ToCell());
     private bool IsValidMoveBetweenNodes(GridCell start, GridCell end)
     {
         const int height = 2;
-        GridDirection direction = GridCoordinates.GetDirectionToCoordinates(start.Coordinates, end.Coordinates);
+        GridDirection direction = start.Coordinates.GetDirectionToCoordinates(end.Coordinates);
 
         // HACK: [LUTRO-238] Dynamically Sized Units - clean this up
         bool lowerOption = !start.HasBlockingObstacle(direction, fromRelativeHeight: 0, height);
@@ -68,20 +90,22 @@ public class TestGridPathfinding : IPathfinding
         // GridManager.Map.GetCellsBelowCoordinates
     }
 
-    int IPathfinding.GetHeuristicCostBetweenNodes(INode start, INode end)
+    int IPathfinder.GetHeuristicCostBetweenNodes(INode start, INode end)
     {
-        return start.ToCell().Coordinates.GetDistanceTo(end.ToCell().Coordinates, ignoreLevelDistance: true, ignoreFallDistance: false);
+        return start.ToCell().Coordinates.DistanceTo(end.ToCell().Coordinates, ignoreDistanceY: true, allowFastFall: false);
     }
 
-    int IPathfinding.GetMoveCostBetweenNodes(INode start, INode end)
+    int IPathfinder.GetMoveCostBetweenNodes(INode start, INode end)
     {
         return 1;
     }
 
-    bool IPathfinding.IsPathOutsideMovementRange(INodePath path)
+    bool IPathfinder.IsPathOutsideMovementRange(NodePath path)
     {
+        // return path.Distance > maxDistance;
         return false;
     }
+    
 
     #endregion
     /************************************************************/
