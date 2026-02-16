@@ -23,27 +23,25 @@ namespace Kokowolo.Base.Demos.TestRunnerDemo
         /*██████████████████████████████████████████████████████████*/
         #region Functions
 
-        void Start()
+        void OnValidate()
         {
-           StartCoroutine(Routine());
-        }
-
-        void Update()
-        {
-           if (Input.GetMouseButtonDown(0)) enabled = false;
-        }
-        
-        IEnumerator Routine()
-        {
-            while (true)
-            {
-                Debug.Log("hi");
-                yield return new WaitForSeconds(1);
-            }
-            
+            new TestObj(3);
         }
         
         #endregion
         /*██████████████████████████████████████████████████████████*/
+    }
+}
+
+public class TestObj
+{
+    public TestObj()
+    {
+        Debug.Log("base");
+    }
+
+    public TestObj(int a) : this()
+    {
+        Debug.Log("a");
     }
 }

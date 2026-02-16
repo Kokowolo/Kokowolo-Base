@@ -40,6 +40,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridMapObject
     [Header("References: IGridMapObject")]
     [SerializeField] GridMetrics _Metrics;
     [SerializeField] GridMap _Map;
+    [SerializeField] TestGridOverlayHandler _OverlayHandler;
     
     [Header("Old Grid Pipeline Settings")]
     [SerializeField] private LayerMask gridMapLayerMask;
@@ -51,15 +52,15 @@ public class TestGridPipelineManager : MonoBehaviour, IGridMapObject
     [SerializeField] private int range = 1;
     [SerializeField] private GridTransform gridTransform;
 
-    private (GridCell, GridMapVisualJob)[] cellJobs = new (GridCell, GridMapVisualJob)[3];
+    private (GridCell, GridOverlay)[] cellJobs = new (GridCell, GridOverlay)[3];
     private NodePath searchPath = new NodePath();
-    GridMapVisualJob searchPathVisualJob;
+    GridOverlay searchPathVisualJob;
 
-    GridMapVisualJob visualJob;
-    List<GridMapVisualJob> visualJobs = new List<GridMapVisualJob>();
+    GridOverlay overlay;
+    List<GridOverlay> visualJobs = new List<GridOverlay>();
     List<GridCell> visualCells = new List<GridCell>();
 
-    GridMapVisualJob gridTransformVisualJob;
+    GridOverlay gridTransformVisualJob;
 
     private InputMode mode = InputMode.Mode1;
  
@@ -70,6 +71,8 @@ public class TestGridPipelineManager : MonoBehaviour, IGridMapObject
     public GridIO IO => throw new System.NotImplementedException();
     public GridMetrics Metrics => _Metrics;
     public IPathfinding Pathfinding => TestGridPathfinding.Instance;
+    // public IGridMapObject.IGridOverlayHandler OverlayHandler => o;
+    IGridOverlayHandler IGridMapObject.OverlayHandler => _OverlayHandler;
     public GridMap Map => _Map;
 
     // Input
@@ -165,8 +168,8 @@ public class TestGridPipelineManager : MonoBehaviour, IGridMapObject
                 visualCells.Add(cell);
             }
 
-            visualJob = GridManager.Visual.CreateVisualJob(
-                GridMapVisualJob.JobType.Group, 
+            overlay = GridManager.TargetMapObject.OverlayHandler.Overlay(
+                GridOverlay.Type.Group,
                 visualCells, 
                 color: KokoRandom.Color() * 0.8f
             );
@@ -177,19 +180,19 @@ public class TestGridPipelineManager : MonoBehaviour, IGridMapObject
             if (cell != null && !visualCells.Contains(cell)) 
             {
                 visualCells.Add(cell);
-                visualJob.Update(visualCells);
+                overlay = overlay.Recreate(visualCells);
             }
         }
         if (Input_Click_Release)
         {
-            visualJobs.Add(visualJob);
+            visualJobs.Add(overlay);
         }
         if (Input_Undo)
         {
             if (visualJobs.Count > 0)
             {
-                visualJob = visualJobs[visualJobs.Count - 1];
-                GridManager.Visual.RemoveVisualJob(visualJob);
+                overlay = visualJobs[visualJobs.Count - 1];
+                overlay?.Dispose();
                 visualJobs.RemoveAt(visualJobs.Count - 1);
             }
         }
@@ -206,7 +209,7 @@ public class TestGridPipelineManager : MonoBehaviour, IGridMapObject
             GridPositioning.Rotate(ref coordinatesList, startDir, direction);
             // update visual
             for (int i = 0; i < visualCells.Count; i++) visualCells[i] = GridManager.TargetMapObject.Map.GetCell(coordinatesList[i]);
-            visualJobs[visualJobs.Count - 1].Update(coordinatesList);
+            visualJobs[visualJobs.Count - 1] = visualJobs[visualJobs.Count - 1]?.Recreate(coordinatesList);
         }
     }
 
@@ -279,15 +282,15 @@ public class TestGridPipelineManager : MonoBehaviour, IGridMapObject
 
         if (cellJobs[index].Item2 == null)
         {
-            cellJobs[index].Item2 = GridManager.Visual.CreateVisualJob(
-                GridMapVisualJob.JobType.Singles, 
+            cellJobs[index].Item2 = GridManager.TargetMapObject.OverlayHandler.Overlay(
+                GridOverlay.Type.Singles, 
                 cell.Coordinates, 
                 color: color
             );
         }
         else
         {
-            cellJobs[index].Item2.Update(cell.Coordinates);
+            cellJobs[index].Item2 = cellJobs[index].Item2.Recreate(cell.Coordinates);
         }
     }
 
@@ -307,14 +310,15 @@ public class TestGridPipelineManager : MonoBehaviour, IGridMapObject
 
             if (searchPathVisualJob == null)
             {
-                searchPathVisualJob = GridManager.Visual.CreateVisualJob(
-                    GridMapVisualJob.JobType.Minis, 
-                    cells
+                searchPathVisualJob = GridManager.TargetMapObject.OverlayHandler.Overlay(
+                    GridOverlay.Type.Minis, 
+                    cells,
+                    Color.white
                 );
             }
             else
             {
-                searchPathVisualJob.Update(cells);
+                searchPathVisualJob = searchPathVisualJob.Recreate(cells);
             }
         }
     }
@@ -352,15 +356,15 @@ public class TestGridPipelineManager : MonoBehaviour, IGridMapObject
         // set GridTransform visual
         if (gridTransformVisualJob == null)
         {
-            gridTransformVisualJob = GridManager.Visual.CreateVisualJob(
-                GridMapVisualJob.JobType.Group, 
+            gridTransformVisualJob = GridManager.TargetMapObject.OverlayHandler.Overlay(
+                GridOverlay.Type.Group, 
                 gridTransform.GetOccupyingCoordsList(), 
                 color: Color.magenta
             );
         }
         else
         {
-            gridTransformVisualJob.Update(gridTransform.GetOccupyingCoordsList());
+            gridTransformVisualJob = gridTransformVisualJob.Recreate(gridTransform.GetOccupyingCoordsList());
         }
 
         // SetDebugGridTransformVisual
@@ -371,13 +375,9 @@ public class TestGridPipelineManager : MonoBehaviour, IGridMapObject
     private IEnumerator ShowForwardCells()
     {
         List<GridCell> cells = gridTransform.GetForwardCells(range);
-        var job = GridManager.Visual.CreateVisualJob(
-            GridMapVisualJob.JobType.Singles, 
-            cells, 
-            color: Color.magenta
-        );
+        var job = GridManager.TargetMapObject.OverlayHandler.Overlay(GridOverlay.Type.Singles, cells, Color.magenta);
         yield return new WaitForSeconds(1f);
-        GridManager.Visual.RemoveVisualJob(job);
+        job.Dispose();
     }
 
     private IEnumerator ShowAllSearchedNodes()
@@ -390,9 +390,9 @@ public class TestGridPipelineManager : MonoBehaviour, IGridMapObject
             cells.Add(node as GridCell);
         }
 
-        var job = GridManager.Visual.CreateVisualJob(GridMapVisualJob.JobType.Minis, cells, color: KokoRandom.Color());
+        var job = GridManager.TargetMapObject.OverlayHandler.Overlay(GridOverlay.Type.Minis, cells, color: KokoRandom.Color());
         yield return new WaitForSeconds(1f);
-        GridManager.Visual.RemoveVisualJob(job);
+        job.Dispose();
     }
 
     private void CustomFunction()

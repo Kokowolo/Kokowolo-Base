@@ -37,10 +37,13 @@ namespace Kokowolo.Grid
         /************************************************************/
         #region Fields
 
+        [SerializeField, Range(0, 1)] float raycastDepth = 0.1f;
+
         private GridCoordinates nextCoordinates = GridCoordinates.Invalid;
         private GridCursorControllerEventArgs eventArgs = new GridCursorControllerEventArgs();
 
-        private GridMapVisualJob visualJob;
+        // private GridMapVisualJob visualJob;
+        GridOverlay overlay;
 
         #endregion
         /************************************************************/
@@ -91,7 +94,8 @@ namespace Kokowolo.Grid
                 // }
                 // else
                 // {
-                    Vector3 localPosition = GridManager.Instance.transform.InverseTransformPoint(WorldCursorManager.HitInfo.point);
+                    Vector3 pos = WorldCursorManager.HitInfo.point - raycastDepth * WorldCursorManager.HitInfo.normal;
+                    Vector3 localPosition = GridManager.Instance.transform.InverseTransformPoint(pos);
                     coordinates = GridPositioning.GetCoordinates(localPosition);
                 // }
             }   
@@ -125,17 +129,23 @@ namespace Kokowolo.Grid
 
         private void UpdateGridMapVisual()
         {
-            if (visualJob == null) 
+            if (overlay == null) 
             {
-                visualJob = GridManager.Visual.CreateVisualJob(
-                    GridMapVisualJob.JobType.Singles, 
+                // visualJob = GridManager.Visual.CreateVisualJob(
+                //     GridMapVisualJob.JobType.Singles, 
+                //     Coordinates,
+                //     priority: 10
+                // );
+                overlay = GridManager.TargetMapObject.OverlayHandler.Overlay(
+                    GridOverlay.Type.Singles, 
                     Coordinates,
+                    Color.white,
                     priority: 10
                 );
             }
             else
             {
-                visualJob.Update(Coordinates);
+                overlay = overlay.Recreate(Coordinates);
             }
         }
 
